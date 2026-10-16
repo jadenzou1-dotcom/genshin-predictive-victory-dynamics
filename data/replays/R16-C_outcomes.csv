@@ -1,0 +1,3 @@
+round,match,winner_side,winner_hp_frac,loser_wiped_at_s,source
+R16-C,1,L,0.02,48.5,"OpenCV HP-bar tracking of genshin_three.mp4; 00:00 at video 54.0 s, HP at 00:00 L 0.153 / R 0.068; right wiped ~3.5 s into overtime; winner HP is near the tracker floor (~0.015)"
+R16-C,2,L,0.01,50.5,"OpenCV HP-bar tracking of genshin_three.mp4; 00:00 at video 113.5 s, HP at 00:00 L 0.034 / R 0.338; right wiped ~5.5 s into overtime; left bar reads 0 from 117 s (below tracker floor) but left won"
