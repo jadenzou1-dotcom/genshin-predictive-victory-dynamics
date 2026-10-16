@@ -30,9 +30,15 @@ UNIT_KEYS = ("dmg", "iv")
 
 
 # ---------------------------------------------------------------- priors
+HIT_G = 0.225      # damage per normal hit / card ATK, measured from replay damage numbers (R16-C:
+                   # Crab 2269/10.1k, Bracer 658/2.9k, Red Vulture 4202/18.7k, Cannoneer 2202/9.8k)
+FLAT_RX = 800.0    # transformative reactions (Overloaded, Electro-Charged, Superconduct) deal a flat
+                   # amount: 400/800 recur dozens of times regardless of attacker ATK (R16-C)
+
+
 def prior_global():
-    return dict(g=math.exp(random.uniform(math.log(0.02), math.log(1.0))),  # damage per hit / ATK
-                k=random.uniform(1.1, 2.0),          # counter multiplier per triangle
+    return dict(g=HIT_G,                             # fixed by measurement (was a free parameter)
+                k=random.uniform(1.2, 2.5),          # counter multiplier per triangle; hits at exactly 2x base are common
                 per_member=float(random.random() < 0.5),
                 freeze_s=random.uniform(0.5, 4.0),   # stun per Freeze
                 amp=random.uniform(1.2, 2.0),        # vaporize/melt multiplier
@@ -45,7 +51,9 @@ def prior_global():
                 drain_mode=float(random.random() < 0.5))  # 1 = flat, 0 = percentage (replay can't yet tell them apart)  # overtime: flat HP/s lost by EVERY unit after the clock (user hypothesis)  # attack-interval increase while Cryo-afflicted (hypothesis)
 
 def prior_unit():
-    return dict(dmg=random.lognormvariate(0, 0.6), iv=random.uniform(0.5, 2.0))
+    # per-hit damage is measured (HIT_G), so dmg only absorbs multi-hit attacks and skill
+    # variety (narrow); attack interval carries the speed and is learned from HP curves
+    return dict(dmg=random.lognormvariate(0, 0.3), iv=random.uniform(1.0, 6.0))
 
 
 def load_posterior():
@@ -79,6 +87,7 @@ def draw_params(unit_ids, posterior, counts=None):
     glob = {k: float(row[k]) for k in GLOBAL_KEYS if k in row}
     for k, v in prior_global().items():
         glob.setdefault(k, v)
+    glob["g"] = HIT_G   # measured; never taken from an older posterior row
     units = {}
     for u in unit_ids:
         n = counts.get(u, 0)
@@ -130,12 +139,12 @@ def react(hit_el, tgt, t, G):
         return 1.0, False
     if pair in ({"Pyro", "Hydro"}, {"Pyro", "Cryo"}):
         return G["amp"], False
-    if pair == {"Electro", "Hydro"}:
-        return 1.25, False
-    if pair == {"Pyro", "Electro"}:      # Overloaded
-        return 1.25, False
-    if pair == {"Cryo", "Electro"}:
-        return 1.15, False
+    if pair in ({"Electro", "Hydro"}, {"Pyro", "Electro"}, {"Cryo", "Electro"}):
+        flat = FLAT_RX                      # Electro-Charged / Overloaded / Superconduct: flat damage
+        if tgt["ward"] > 0:
+            a = min(tgt["ward"], flat); tgt["ward"] -= a; flat -= a
+        tgt["hp"] -= flat
+        return 1.0, False
     if hit_el == "Anemo":
         return 1.0, True
     return 1.0, False

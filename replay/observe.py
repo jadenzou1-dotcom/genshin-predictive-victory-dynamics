@@ -5,7 +5,7 @@ tau = 45 + (video time since the clock first read 0).
 
 For each match and each whole second tau = 0..T:
   hp_L, hp_R      team HP bar fill (median over that second)
-  alive_L/R       visible unit bars, smoothed: rolling max over a 5 s window (units hidden
+  alive_L/R       visible unit bars, smoothed: forward-looking max over 4 s (units hidden
                   behind effects or off camera can't be counted, but a dead unit never
                   comes back), then a running minimum so the curve can only fall; normalised by the count at the start of the fight
 Usage: python -m replay.observe <round> [extracted_dir]   -> <round>_curves.csv
@@ -69,8 +69,10 @@ def curves(rows):
     out = []
     for side in "LR":
         k = f"n_{side}"
-        # rolling max over 5 s bridges short occlusions; running min enforces "dead stays dead"
-        sm = [max(raw[j][k] for j in range(max(0, i - 2), min(len(raw), i + 3))) for i in range(len(raw))]
+        # forward-looking max over the next 4 s bridges short occlusions without delaying a
+        # death (a death at t lowers every window starting at or after t); running min then
+        # enforces "dead stays dead"
+        sm = [max(raw[j][k] for j in range(i, min(len(raw), i + 5))) for i in range(len(raw))]
         for i in range(1, len(sm)):
             sm[i] = min(sm[i], sm[i - 1])
         n0 = max(sm[:4]) or 1

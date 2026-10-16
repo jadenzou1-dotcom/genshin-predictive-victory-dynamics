@@ -82,35 +82,67 @@ def read_frame(frame):
     return out
 
 
+POP_LIFE = 1.2   # a damage number is on screen for about a second
+
+
+def pops(rows, value_of):
+    """Group reads into pops: same value, nearby, within POP_LIFE s of the pop's FIRST read
+    (anchoring to the first read stops identical repeated hits chaining into one)."""
+    events = []
+    for r in sorted(rows, key=lambda r: r["tau"]):
+        v = value_of(r)
+        if v is None:
+            continue
+        for e in reversed(events):
+            if e["value"] == v and r["tau"] - e["tau"] <= POP_LIFE and abs(r["x"] - e["x"]) <= POP_DIST \
+                    and -80 <= e["y"] - r["y"] <= 140:   # pops drift upward
+                e["x"], e["y"] = r["x"], r["y"]; e["n"] += 1
+                e["els"].append(r["el"]); e["tgts"].append(r["target"])
+                break
+        else:
+            events.append(dict(tau=r["tau"], value=v, x=r["x"], y=r["y"], n=1, els=[r["el"]], tgts=[r["target"]]))
+    return events
+
+
 def clean(raw):
-    """raw: rows with match, tau, txt, el, x, y, target. Returns hit events per match."""
+    """raw: rows with match, tau, txt, el, x, y, target. Returns hit events per match.
+    Vocabulary = values of 3-5 digits read exactly in >= VOCAB_MIN distinct pops, minus
+    fragments (a value contained in a more frequent vocabulary value, e.g. 752 / 175 inside
+    1752) and merges (a value that contains another vocabulary value it is more than one
+    digit longer than... handled by matching the longest contained value only for reads
+    that are not themselves in the vocabulary)."""
     by = defaultdict(list)
     for r in raw:
         by[r["match"]].append(r)
     hits = []
     for m, rows in by.items():
-        exact = Counter(r["txt"] for r in rows if 2 <= len(r["txt"]) <= 5)
-        vocab = sorted([v for v, c in exact.items() if c >= VOCAB_MIN], key=len, reverse=True)
-        events = []
-        for r in sorted(rows, key=lambda r: r["tau"]):
-            v = r["txt"] if r["txt"] in vocab else next((w for w in vocab if w in r["txt"] and len(w) >= 3), None)
-            if not v:
-                continue
-            for e in events:   # same pop still on screen?
-                if e["value"] == int(v) and r["tau"] - e["last"] <= POP_GAP and abs(r["x"] - e["x"]) <= POP_DIST \
-                        and -80 <= e["y"] - r["y"] <= 140:   # pops drift upward
-                    e["last"], e["x"], e["y"] = r["tau"], r["x"], r["y"]
-                    e["n"] += 1; e["els"].append(r["el"]); e["tgts"].append(r["target"])
-                    break
-            else:
-                events.append(dict(match=m, tau=r["tau"], last=r["tau"], value=int(v), x=r["x"], y=r["y"], n=1,
-                                   els=[r["el"]], tgts=[r["target"]]))
-        for e in events:
+        exact = pops([r for r in rows if 3 <= len(r["txt"]) <= 5], lambda r: r["txt"])
+        cnt = Counter(e["value"] for e in exact)
+        vocab = {v for v, c in cnt.items() if c >= VOCAB_MIN}
+        vocab = {v for v in vocab if not any(v != w and v in w and cnt[w] >= cnt[v] for w in vocab)}
+        # drop merges: a vocab value formed from two other vocab values overlapping
+        vocab = {v for v in vocab if not any(w != v and w in v and cnt[w] > cnt[v] for w in vocab)}
+        order = sorted(vocab, key=len, reverse=True)
+        val = lambda r: (int(r["txt"]) if r["txt"] in vocab
+                         else next((int(w) for w in order if w in r["txt"]), None))
+        for e in pops(rows, val):
             el = Counter(x for x in e["els"] if x != "?").most_common(1)
             tg = Counter(x for x in e["tgts"] if x).most_common(1)
             hits.append(dict(match=m, tau=round(e["tau"], 2), value=e["value"], element=el[0][0] if el else "?",
                              target=tg[0][0] if tg else "", frames=e["n"]))
     return hits
+
+
+def reclean(rnd, d="data/replays/extracted"):
+    d = Path(d)
+    raw = []
+    for r in csv.DictReader(open(d / f"{rnd}_dmg_raw.csv")):
+        r["tau"] = float(r["tau"]); r["x"] = int(r["x"]); r["y"] = int(r["y"]); raw.append(r)
+    hits = clean(raw)
+    with open(d / f"{rnd}_hits.csv", "w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=["match", "tau", "value", "element", "target", "frames"]); w.writeheader()
+        for h in hits: w.writerow(h)
+    print(f"{rnd}: {len(raw)} raw reads -> {len(hits)} hits")
 
 
 def main(video, rnd, d="data/replays/extracted", fps_out=5):
@@ -150,4 +182,7 @@ def main(video, rnd, d="data/replays/extracted", fps_out=5):
 
 if __name__ == "__main__":
     a = sys.argv
+    if a[1] == "--reclean":
+        for rnd in a[2:]: reclean(rnd)
+        sys.exit()
     main(a[1], a[2], a[3] if len(a) > 3 else "data/replays/extracted", int(a[4]) if len(a) > 4 else 5)

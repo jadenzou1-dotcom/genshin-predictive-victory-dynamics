@@ -40,6 +40,21 @@ curves = {}
 for rnd in {o["round"] for o in obs}:
     for m, c in load_curves(rnd).items():
         curves[(rnd, m)] = c
+# Anchor each observed curve to the wipe time logged in the outcomes file: truncate or
+# extend (holding the last row) to that second, and set the loser's HP and alive share to 0
+# on the final row. The extracted curve alone stops early when the winner's bar drops
+# below the tracker floor (R16-C M2) and never shows the loser's last body dying.
+for o in obs:
+    key = (o["round"], o["match"])
+    if key not in curves or not o["loser_wiped_at_s"]:
+        continue
+    end = int(math.ceil(float(o["loser_wiped_at_s"])))
+    c = [dict(r) for r in curves[key][:end + 1]]
+    while len(c) < end + 1:
+        c.append(dict(c[-1], tau=len(c)))
+    lo = "L" if o["winner_side"] == "R" else "R"
+    c[-1][f"hp_{lo}"] = 0.0; c[-1][f"alive_{lo}"] = 0.0
+    curves[key] = c
 ids = sorted({p["unit_id"] for pl in plists.values() for p in pl})
 
 
@@ -74,24 +89,21 @@ def distance(o, res, tr):
 
 
 def one(seed):
-    """One global draw: returns its parameters, the M distances per match, and for each
-    match the unit draw with the smallest distance (kept as that match's representative)."""
+    """One global draw: returns its parameters and, per match, the M unit draws with their
+    distances. After EPS is chosen, one unit draw per match is sampled in proportion to its
+    kernel weight (not the best one, which would make unit posteriors overconfident)."""
     random.seed(seed)
     G = sim.prior_global()
     row, ds = dict(G), []
     for o in obs:
         pl = plists[(o["round"], o["match"])]
         mids = sorted({p["unit_id"] for p in pl})
-        best, dl = None, []
+        dl, Ul = [], []
         for _ in range(M):
             U = {u: sim.prior_unit() for u in mids}
             tr = []
-            d = distance(o, sim.run(units, pl, G, U, trace=tr), tr)
-            dl.append(d)
-            if best is None or d < best[0]: best = (d, U)
-        ds.append(dl)
-        for u in mids:
-            for k in sim.UNIT_KEYS: row[f"{u}.{k}"] = best[1][u][k]
+            dl.append(distance(o, sim.run(units, pl, G, U, trace=tr), tr)); Ul.append(U)
+        ds.append((dl, Ul, mids))
     return row, ds
 
 
@@ -99,7 +111,7 @@ def weights(results, eps):
     lw = []
     for _, ds in results:
         s = 0.0
-        for dl in ds:
+        for dl, _, _ in ds:
             lik = sum(math.exp(-0.5 * (d / eps) ** 2) for d in dl) / len(dl)
             if lik <= 0: s = -math.inf; break
             s += math.log(lik)
@@ -121,14 +133,24 @@ if __name__ == "__main__":
         results = pool.map(one, range(N), chunksize=10)
     # tolerance: the smallest EPS (from a grid) that leaves an effective sample of >= TARGET_ESS
     TARGET_ESS = 40
-    for eps in [0.04, 0.05, 0.06, 0.07, 0.08, 0.10, 0.12, 0.15, 0.2, 0.25, 0.3]:
+    w = None
+    for eps in [0.04, 0.05, 0.06, 0.07, 0.08, 0.10, 0.12, 0.15, 0.2, 0.25, 0.3, 0.4]:
         w = weights(results, eps)
         if w and ess(w) >= TARGET_ESS:
             break
-    print(f"tolerance EPS = {eps}  effective sample size {ess(w):.1f} of {N} draws")
+    if not w:
+        sys.exit("no draw has positive weight at any tolerance")
+    print(f"tolerance EPS = {eps}  effective sample size {ess(w):.1f} of {N} draws"
+          + ("" if ess(w) >= TARGET_ESS else "  (TARGET NOT REACHED: posterior is thin)"))
+    random.seed(12345)
     kept = []
-    for (row, _), wi in zip(results, w):
+    for (row, ds), wi in zip(results, w):
         if wi > 1e-6:
+            for dl, Ul, mids in ds:
+                ks = [math.exp(-0.5 * (d / eps) ** 2) for d in dl]
+                U = random.choices(Ul, weights=ks)[0] if sum(ks) > 0 else Ul[min(range(len(dl)), key=dl.__getitem__)]
+                for u in mids:
+                    for k in sim.UNIT_KEYS: row[f"{u}.{k}"] = U[u][k]
             row["weight"] = wi; kept.append(row)
     print(f"{len(kept)} draws with non-negligible weight")
     cols = list(kept[0].keys())
