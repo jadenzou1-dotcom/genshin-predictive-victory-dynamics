@@ -385,3 +385,15 @@ Match 2 is effectively a coin flip that hinges on one mechanic. A percentage dra
 - **Brier.** C1 model 0.148 / crowd 0.023; C2 model 0.240 / crowd 0.593. Crowd Brier uses the final post-round rates (early snapshots were 82/18 and 22/78, kept in `crowd_log.csv`).
 - **Overtime hint (weak).** C2 hinged on drain type: flat → 36% L, percentage → ~100% L. Chubby Crisis won, which is one data point toward percentage drain. Not confirmed until the C2 replay is checked for whether it went to overtime.
 - **`make_results.py` fix.** The scoreboard counted D (no model prediction) as model misses. Now both columns are scored only on matches the model predicted.
+
+---
+
+## 2026-10-15 — QF-A predictions, crowd blend, outside data check
+
+- **QF-A logged.** Both matches are R16 rematches with every unit already seen (no tempering). Placements show a team that switches sides is rotated 180°: row r → 5−r, col c → 7−c.
+- **Sim:** M1 Saurians 67.5% (flat drain 69% / pct drain 53%); M2 Fruity 57.6% (flat 55% / pct 70%). Crowd early: 39% and 17%.
+- **New `blend.py`:** logit p = w·logit(model) + (1−w)·logit(crowd), Beta(2,2) prior on w, grid posterior. On 6 matches: w ≈ 0.46 (80% interval 0.17–0.75). Leave-one-out log loss: model 0.903, crowd 0.741, blend 0.780, so there isn't yet evidence the blend beats the crowd. Blend for QF-A: M1 Saurians 52%, M2 Fruity 33%. Both underdogs remain +EV because of the multipliers.
+- **Outside data.** A third-party event guide (allthings.how) confirms: fixed-rule simulation, support rate has no effect on combat and locks 4 h before round end, wrong pick = 10 pts/emblem, long fights get a continuous-damage phase. It states the class triangle as Ranged > Melee > Flying > Ranged, which is the **reverse** of the in-game legend. The legend's arrows read Melee → Ranged → Flying → Melee, and the same arrow convention gives AoE → Squad → Single-Target → AoE, which the guide agrees with. So the sim's `BEATS` is kept as is and the guide is treated as wrong on that point. Its Group D table added multiplier tier points (35% → ×70, 65% → ×35).
+- **Open-world wiki data not used.** Event units have custom HP/ATK and event-only mechanics, and the sim has no RES term, so open-world RES values and attack patterns don't map onto any sim parameter.
+- **Multiplier is a step function.** README payout section rewritten with the observed tiers.
+- **Known bug:** `sim.py` defines `tempered()` but never calls it; Group C's tempered numbers were computed outside the main loop. Irrelevant for QF-A (all seen); fix before a round with new units.

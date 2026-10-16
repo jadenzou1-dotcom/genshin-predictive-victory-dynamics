@@ -25,7 +25,18 @@ With `p` = true win probability of the side you back and `M` = its multiplier:
 EV per emblem = p·M + (1 − p)·10
 ```
 
-Fitted from observed (support rate, multiplier) pairs: `M ≈ 20 + 28·(1−s)/s`, apparently capped at 200.
+The multiplier is a **step function of support rate**, not a smooth curve (the earlier fit `M ≈ 20 + 28·(1−s)/s` is retired). Observed tiers so far:
+
+| Support rate seen | Multiplier |
+|---|---|
+| 13% | ×200 (cap?) |
+| 17–25% | ×105 |
+| 34–39% | ×70 |
+| 61–66% | ×35 |
+| 75–83% | ×30 |
+| 87% | ×25 |
+
+Tier edges between these points are unknown. Inside a tier the payout is flat, so a 17% underdog pays the same as a 25% one.
 
 Because the score is linear in emblems and wrong picks still pay, EV maximization puts all emblems on the single best pick. Splitting only buys lower variance.
 
