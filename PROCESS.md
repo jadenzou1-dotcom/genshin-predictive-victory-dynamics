@@ -540,3 +540,5 @@ Not implemented:
 - **Shadow (max CE, λ = 2.1e-4):** 100 Saurians + 100 Blazing Beasts. EV 6,342, SD 3,148. On M2, CE is 2,206 for Blazing Beasts vs about 2,160 for Fruity, a near tie.
 - **Dino (max EV):** 100 Saurians + 100 Fruity. EV 8,359, SD 5,433.
 - P(Shadow reaches 16k), assuming ~4,460 points now and 4 future favourite bets: 0.902 for the CE pick vs 0.877 for both underdogs. With only 3 future bets the order flips: 0.602 vs 0.668.
+
+**Follow-up (19:45):** each account bets 100 emblems total tonight, backloading the rest for later rounds. Standard pooling is fixed at **35% model / 65% crowd** for every match (panel average 33%). At 35/65: P(Saurians) = 0.511, P(Fruity) = 0.368. EV of 100 emblems: Saurians 4,068, Fungi 2,222, Fruity 4,496, Blazing Beasts 2,264. **Shadow** (max CE, λ = 2.1e-4): 65 Saurians + 35 Fruity (EV 4,218, SD 2,524). **Dino** (max EV): 100 Fruity.
