@@ -192,12 +192,12 @@ The model never sees support rates; "Crowd" is the support rate read as a win pr
 | Team | Saurians Are the Cutest | Little Fungi Clan |
 | Crowd support | 39% | 61% |
 | Multiplier | ×70 | ×35 |
-| Model win chance | 60.5% | 39.5% |
+| Model win chance | 52.1% | 47.9% |
 
 - **Winner:** pending
-- **Model's call:** Saurians Are the Cutest (60.5%)
+- **Model's call:** Saurians Are the Cutest (52.1%)
 - **Crowd's call:** Little Fungi Clan (61%)
-- **Notes:** all units seen; v3 model (measured hit size 0.225xATK, flat reactions) + trajectory calibration on 6 replays (EPS 0.10, ESS 70, P(flat drain)=0.42); drain split flat 0.652 / pct 0.551; M1 has swung 0.675/0.291/0.303/0.605 across model versions -> low confidence; sim reproduces Sappho R16-A win only 27% in-sample
+- **Notes:** all units seen; v4 model (hit = 0.5 DEF x 0.9 RES x ATK, counters ~1x, freeze up to 6 s, boss-freeze prior 0.25 (always drawn from prior), Sappho splash) + trajectory calibration (EPS 0.10, ESS 42); boss can be frozen 0.233 / cannot 0.625 (decides the match); P(freezable)=0.25 after R16-A frame sweep (2 chances, 0 freezes); raw sim 0.521; flat 0.425 / pct 0.401; sim reproduces Sappho R16-A win 33% in-sample
 
 ### Match 2: Mirror Fruity Order vs Unofficial Blazing Beasts Members
 
@@ -206,12 +206,12 @@ The model never sees support rates; "Crowd" is the support rate read as a win pr
 | Team | Mirror Fruity Order | Unofficial Blazing Beasts Members |
 | Crowd support | 17% | 83% |
 | Multiplier | ×105 | ×30 |
-| Model win chance | 80.5% | 19.5% |
+| Model win chance | 87.8% | 12.2% |
 
 - **Winner:** pending
-- **Model's call:** Mirror Fruity Order (80.5%)
+- **Model's call:** Mirror Fruity Order (87.8%)
 - **Crowd's call:** Unofficial Blazing Beasts Members (83%)
-- **Notes:** all units seen; v3 model (measured hit size 0.225xATK, flat reactions) + trajectory calibration on 6 replays (EPS 0.10, ESS 70, P(flat drain)=0.42); drain split flat 0.749 / pct 0.863; Fruity favoured in every model version (0.576-0.805)
+- **Notes:** all units seen; v4 model (hit = 0.5 DEF x 0.9 RES x ATK, counters ~1x, freeze up to 6 s, boss-freeze prior 0.25 (always drawn from prior), Sappho splash) + trajectory calibration (EPS 0.10, ESS 42); boss-freeze irrelevant (0.869/0.869); flat 0.844 / pct 0.880; Fruity favoured in every model version (0.576-0.875)
 
 <details><summary>Crowd snapshots this round</summary>
 

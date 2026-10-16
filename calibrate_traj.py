@@ -80,10 +80,15 @@ def distance(o, res, tr):
     # alive share is only trusted for a side whose visible bar count at the start matches
     # its body count (+-25%); bosses can carry extra bars (shields), squads can overlap
     use = [abs(c[0]["n0_L"] - n0L) <= 0.25 * n0L, abs(c[0]["n0_R"] - n0R) <= 0.25 * n0R]
+    # low-HP squad members fall below the bar detector's minimum fill and read as dead, so
+    # alive share is down-weighted for sides that contain squads (panel agent 5)
+    pl = plists[(o["round"], o["match"])]
+    sq = [0.5 if any(int(units[p["unit_id"]]["members_per_squad"]) > 1 for p in pl if p["side"] == s) else 1.0
+          for s in "LR"]
     se_hp = se_al = 0.0
     for s, ob in zip(sim_rows, c):
         se_hp += (s[0] - ob["hp_L"]) ** 2 + (s[1] - ob["hp_R"]) ** 2
-        se_al += use[0] * (s[2] - ob["alive_L"]) ** 2 + use[1] * (s[3] - ob["alive_R"]) ** 2
+        se_al += use[0] * sq[0] * (s[2] - ob["alive_L"]) ** 2 + use[1] * sq[1] * (s[3] - ob["alive_R"]) ** 2
     d = math.sqrt(se_hp / (2 * n)) + W_ALIVE * math.sqrt(se_al / (max(sum(use), 1) * n))
     return d + (W_WIN if w != o["winner_side"] else 0)
 

@@ -18,8 +18,21 @@ from statistics import median
 CLOCK = 45
 
 
+MIN_BAR_PX = 30   # real overhead HP bars are ~38-57 px long; elemental effects make 6-20 px blobs
+                  # that were being counted as units (panel agent 5: Sappho read as 5 bars in R16-A M2)
+
+
 def load_frames(path):
     rows = list(csv.DictReader(open(path)))
+    bars_path = Path(str(path).replace("_frames.csv", "_bars.csv"))
+    if bars_path.exists():   # recount bodies from bars.csv, keeping only bar-length detections
+        cnt = defaultdict(lambda: {"L": 0, "R": 0})
+        for b in csv.DictReader(open(bars_path)):
+            if int(b["total"]) >= MIN_BAR_PX:
+                cnt[(b["vt"], b["match"])][b["side"]] += 1
+        for r in rows:
+            c = cnt.get((r["vt"], r["match"]), {"L": 0, "R": 0})
+            r["bars_L"], r["bars_R"] = c["L"], c["R"]
     by = defaultdict(list)
     for r in rows:
         by[int(r["match"])].append(r)

@@ -100,17 +100,43 @@ def draw_params(unit_ids, posterior, counts=None):
     for k, v in prior_global().items():
         glob.setdefault(k, v)
     glob["g"] = HIT_G   # measured; never taken from an older posterior row
-    # no replay identifies boss_freeze (trajectory likelihood ratio ~1.1), so it is always drawn
-    # from its evidence-based prior rather than inherited from posterior rows fit under 50/50
-    glob["boss_freeze"] = prior_global()["boss_freeze"]
-    units = {}
+    # boss_freeze is kept from the row: rows are fit under the 0.25 prior, so the row's own value
+    # stays consistent with the Sappho parameters fitted alongside it (panel agent 3)
+    # Shrinkage is drawn once per SOURCE REPLAY GROUP, not per unit: units fitted jointly in the
+    # same replays (e.g. the 3 Fungi types) come from the posterior together or not at all
+    # (panel agent 3). Probability n/(n+SHRINK_N0), n = replays the group appeared in.
+    groups = replay_groups()
+    use, units = {}, {}
     for u in unit_ids:
         n = counts.get(u, 0)
-        if f"{u}.dmg" in row and random.random() < n / (n + SHRINK_N0):
+        key = groups.get(u)
+        if key not in use:
+            use[key] = random.random() < n / (n + SHRINK_N0)
+        if f"{u}.dmg" in row and n and use[key]:
             units[u] = {k: float(row[f"{u}.{k}"]) for k in UNIT_KEYS}
         else:
             units[u] = prior_unit()
     return glob, units
+
+
+_GROUPS = None
+
+
+def replay_groups():
+    """unit_id -> frozenset of (round, match) replays it appeared in (cached)."""
+    global _GROUPS
+    if _GROUPS is None:
+        import glob as _g
+        obs = []
+        for f in sorted(_g.glob(str(DATA / "replays" / "*_outcomes.csv"))):
+            obs += list(csv.DictReader(open(f)))
+        keys = {(o["round"], o["match"]) for o in obs}
+        g = {}
+        for p in csv.DictReader(open(DATA / "placements.csv")):
+            if (p["round"], p["match"]) in keys:
+                g.setdefault(p["unit_id"], set()).add((p["round"], p["match"]))
+        _GROUPS = {u: frozenset(v) for u, v in g.items()}
+    return _GROUPS
 
 
 # ---------------------------------------------------------------- data
@@ -147,6 +173,7 @@ def react(hit_el, tgt, t, G):
             tgt["aura"], tgt["aura_until"] = hit_el, t + AURA_S
         return 1.0, False
     pair = {hit_el, aura}
+    tgt["swirled"] = aura   # remembered so Swirl can spread it (panel agent 2)
     tgt["rx"] = tgt.get("rx", 0) + 1
     tgt["aura"], tgt["aura_until"] = None, 0
     if pair == {"Hydro", "Cryo"}:
@@ -240,6 +267,8 @@ def run(units, plist, G, U, dt=0.1, trace=None):
             near = [e for e in foes if math.hypot(e["r"] - tgt["r"], e["c"] - tgt["c"]) <= G["aoe_r"]]
             splash = a["u"]["target_type"] == "AoE" or "Splash AoE" in a["u"].get("special_tags", "")
             hits = [(e, 1.0) for e in near] if splash else [(tgt, 1.0)]
+            if "Splash AoE" in a["u"].get("special_tags", ""):   # panel agent 2: replay shows her volleys
+                hits = [(e, 1.0) for e in sorted(foes, key=lambda e: math.hypot(e["r"] - tgt["r"], e["c"] - tgt["c"]))[:3]]
             if a["opening_aoe"]:   # entry move: one AoE hit at ~2x damage (assumption)
                 a["opening_aoe"] = False
                 hits = [(e, 2.0) for e in near]
@@ -248,6 +277,8 @@ def run(units, plist, G, U, dt=0.1, trace=None):
             for h, frac in hits:
                 if el in h["u"].get("immune", "").split("|"):   # e.g. Pyro Specter vs Pyro DMG
                     continue
+                if h["frozen_until"] > t and el in ("Anemo", "Pyro"):   # Swirl / Melt consumes Freeze (panel agent 2)
+                    h["frozen_until"] = t; h["stun"] = min(h["stun"], t)
                 mult, swirl = react(el, h, t, G)
                 dmg = a["atk"] * frac * mult * counter_mult(a["u"], h["u"], G["k"])
                 if h["frozen_until"] > t: dmg *= 1 + G["shatter"]
@@ -260,13 +291,17 @@ def run(units, plist, G, U, dt=0.1, trace=None):
                         h["u"]["range_type"], h["els"] = "Melee", ["Physical"]
                     elif h["u"]["unit_id"] == "bubbler_seahorse":
                         h["u"]["target_type"], h["els"] = "Single-Target", ["Hydro"]
-                if a["u"]["cc_on_hit"] == "immobilize": h["stun"] = max(h["stun"], t + 0.5)
+                if a["u"]["cc_on_hit"] == "immobilize" and "Boss" not in h["u"].get("special_tags", ""):
+                    h["stun"] = max(h["stun"], t + 0.5)   # card: immobilizes "weaker enemies" (panel agent 2)
                 if a["u"].get("ground_burn") == "yes" and h["u"]["range_type"] != "Flying":
                     h["burns"].append((0.1 * a["atk"], t + 3.0, el))   # burning zone: 0.1x ATK/s for 3 s
                 if swirl:
                     for o in foes:
                         if o is not h and math.hypot(o["r"] - h["r"], o["c"] - h["c"]) <= 1.5:
                             o["hp"] -= 0.5 * a["atk"]
+                            sw = h.get("swirled")   # Swirl spreads the absorbed element (panel agent 2)
+                            if sw and sw not in o["u"].get("immune", "").split("|"):
+                                react(sw, o, t, G)
             slow = 1 + G["cryo_slow"] if (a["aura"] == "Cryo" and a["aura_until"] > t) else 1
             a["next"] = t + a["iv"] * slow
             if a["burst"] > 0:   # opening suppressive fire: rapid first volleys
