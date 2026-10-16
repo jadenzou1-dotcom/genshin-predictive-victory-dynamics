@@ -1,0 +1,7 @@
+round,match,left_team,right_team,snapshot_time_et,locked,left_support_pct,right_support_pct,left_mult,right_mult,notes
+R16-A,1,The Mysterious Howl Crew,Little Fungi Clan,2026-10-12 12:20,no,25,75,105,30,pre-lock snapshot
+R16-A,2,Frostarm and Shaman Formation,Saurians Are the Cutest,2026-10-12 12:20,no,87,13,25,200,pre-lock snapshot; 200 looks like the cap
+R16-B,1,Elemental Dye Experts,Mirror Fruity Order,2026-10-13 21:41,yes,21,79,105,30,final (support rate locked)
+R16-B,2,Unofficial Blazing Beasts Members,"Rude-a-Lot, Hats-a-Not",2026-10-13 21:41,yes,78,22,30,105,final (support rate locked)
+R16-C,1,Reserve Grenadier Squad,Seahorse and Crab,2026-10-13 23:00,no,82,18,,,early; seen on overview screen; multipliers not recorded
+R16-C,2,A Little Chubby Crisis,Consecrated Beast Frightfest,2026-10-13 23:00,no,22,78,,,early; seen on overview screen; multipliers not recorded

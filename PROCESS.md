@@ -359,3 +359,12 @@ Lesson: a model fitted on 2 battles shouldn't output 78% on a lineup made entire
 | Chubby Crisis vs Consecrated Beasts | 52.6% L | **51.0% L** | 22% L | **Overtime drain type:** flat → 36% L, percentage → ~100% L |
 
 Match 2 is effectively a coin flip that hinges on one mechanic. A percentage drain would melt the two big bosses while sparing the 14k-HP slimes, and a flat drain does the reverse. 76% of sims go to overtime.
+
+---
+
+## 2026-10-15 — Decisions recorded: CE for Strategy A, saving emblems, crowd log
+
+- **Strategy A objective is CE.** Of the alternatives discussed (CE, log utility, robust EV), Jaden chose `CE = EV − (λ/2)·Var`. λ is still to be fixed and held for the rest of the event. `strategies.py` still implements max-Sharpe; updating it is pending.
+- **Saving emblems (decided 2026-10-13).** Jaden's reasoning: the model improves with every replay (cumulative calibration, per-unit shrinkage `n/(n+2)`, tempering for unseen lineups), and the quarterfinals will be fought by units already seen. So skip Groups C and D and spend saved emblems in the quarterfinals. Rollover is unconfirmed, so Group C doubles as a test: Account A skips, Account B bets as a control. This mixes a rollover test into the A-vs-B comparison for one round.
+- **New file `data/crowd_log.csv`.** Support rates and multipliers disappear once a round ends, so each on-screen snapshot is now logged with a timestamp and whether the rate had locked. Backfilled from earlier screenshots. R16-C multipliers weren't recorded.
+- README now has a "Strategy decisions" section covering the Sharpe finding, the CE switch and the saving plan.
