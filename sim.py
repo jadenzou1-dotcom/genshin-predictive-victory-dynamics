@@ -23,7 +23,7 @@ CLOCK = 45.0
 OVERTIME = 60.0   # after the clock, every unit loses a flat G['drain'] HP/s until one side is wiped
 AURA_S = 6.0
 
-GLOBAL_KEYS = ("g", "k", "per_member", "freeze_s", "amp", "rain_on", "shatter", "cryo_slow", "aoe_r", "drain", "drain_pct", "drain_mode")
+GLOBAL_KEYS = ("g", "k", "per_member", "freeze_s", "amp", "rain_on", "shatter", "cryo_slow", "aoe_r", "drain", "drain_pct", "drain_mode", "boss_freeze")
 SHRINK_N0 = 2.0   # per-unit posterior weight = n / (n + SHRINK_N0), n = replays the unit appeared in
 BATTLE_NOISE = 0.15   # per-battle lognormal damage noise per unit (crits, AI targeting luck)
 UNIT_KEYS = ("dmg", "iv")
@@ -43,11 +43,12 @@ FLAT_RX = 800.0    # transformative reactions (Overloaded, Electro-Charged, Supe
 
 def prior_global():
     return dict(g=HIT_G,                             # fixed by measurement (was a free parameter)
-                k=random.uniform(1.0, 2.5),          # counter multiplier per triangle. NOT measured: 2x-base hits
-                                                     # occur on advantaged AND disadvantaged matchups (same attacker
-                                                     # shows 1x and 2x on one target), i.e. a skill ladder, not counters
+                k=random.uniform(1.0, 1.15),         # counter multiplier per triangle on DAMAGE. Replay damage numbers
+                                                     # show 1.0x on advantaged and disadvantaged matchups alike (two
+                                                     # independent frame checks, R16-A/B/C), so near 1; small slack
+                                                     # left in case counters act through something not yet seen
                 per_member=float(random.random() < 0.5),
-                freeze_s=random.uniform(0.5, 4.0),   # stun per Freeze
+                freeze_s=random.uniform(0.5, 6.0),   # stun per Freeze (R16-A: Sappho kept the Lawachurl frozen 10 s straight)
                 amp=random.uniform(1.2, 2.0),        # vaporize/melt multiplier
                 rain_on=float(random.random() < 0.5),  # Hydro rain wets own team
                 shatter=random.uniform(0.0, 1.0),    # bonus vs frozen targets
@@ -55,7 +56,9 @@ def prior_global():
                 aoe_r=random.uniform(0.4, 1.6),       # AoE radius in grid cells (learned from R16-A AoE-vs-squad fights)
                 drain=math.exp(random.uniform(math.log(1000), math.log(15000))),   # flat HP/s per unit in overtime
                 drain_pct=random.uniform(0.02, 0.15),     # or: fraction of max HP/s per unit in overtime
-                drain_mode=float(random.random() < 0.5))  # 1 = flat, 0 = percentage (replay can't yet tell them apart)  # overtime: flat HP/s lost by EVERY unit after the clock (user hypothesis)  # attack-interval increase while Cryo-afflicted (hypothesis)
+                drain_mode=float(random.random() < 0.5),
+                boss_freeze=float(random.random() < 0.5))   # can Boss-tagged units be frozen? one R16-A frame suggests
+                                                             # not; no replay yet decides it, so it stays 50/50  # 1 = flat, 0 = percentage (replay can't yet tell them apart)  # overtime: flat HP/s lost by EVERY unit after the clock (user hypothesis)  # attack-interval increase while Cryo-afflicted (hypothesis)
 
 def prior_unit():
     # a 100% hit is HIT_G x ATK; skill multipliers seen in replays run 50%-200%, so the average
@@ -143,6 +146,8 @@ def react(hit_el, tgt, t, G):
     tgt["rx"] = tgt.get("rx", 0) + 1
     tgt["aura"], tgt["aura_until"] = None, 0
     if pair == {"Hydro", "Cryo"}:
+        if "Boss" in tgt["u"].get("special_tags", "") and not G.get("boss_freeze", 1):
+            return 1.0, False
         tgt["stun"] = max(tgt["stun"], t + G["freeze_s"]); tgt["frozen_until"] = t + G["freeze_s"]
         return 1.0, False
     if pair in ({"Pyro", "Hydro"}, {"Pyro", "Cryo"}):
@@ -229,11 +234,12 @@ def run(units, plist, G, U, dt=0.1, trace=None):
                         a["r"] += 0.6 * (a["r"] - m["r"]) / max(dm, 0.1)
             el = a["els"][a["el_i"] % len(a["els"])]; a["el_i"] += 1
             near = [e for e in foes if math.hypot(e["r"] - tgt["r"], e["c"] - tgt["c"]) <= G["aoe_r"]]
-            hits = [(e, 1.0) for e in near] if a["u"]["target_type"] == "AoE" else [(tgt, 1.0)]
+            splash = a["u"]["target_type"] == "AoE" or "Splash AoE" in a["u"].get("special_tags", "")
+            hits = [(e, 1.0) for e in near] if splash else [(tgt, 1.0)]
             if a["opening_aoe"]:   # entry move: one AoE hit at ~2x damage (assumption)
                 a["opening_aoe"] = False
                 hits = [(e, 2.0) for e in near]
-            if a["u"]["secondary_aoe"] == "yes" and a["u"]["target_type"] != "AoE":
+            if a["u"]["secondary_aoe"] == "yes" and not splash:
                 hits += [(e, 0.5) for e in near if e is not tgt]
             for h, frac in hits:
                 if el in h["u"].get("immune", "").split("|"):   # e.g. Pyro Specter vs Pyro DMG
