@@ -499,3 +499,44 @@ An independent agent with no prior context reviewed the whole pipeline. **Verdic
 - **Blend weight w** was fit on v1–v3 calls; its own leave-one-out favours crowd-only. With w = 0, M1 is +EV at ×70/×35 (33.4 vs 25.2) but not at ×50/×40, and M2 is a tie (26.2 vs 26.6). M2 stays +EV for w ≥ ~0.05.
 - **strategies.py** verified correct. Limits: probabilities carry no model uncertainty, and CE ignores the 16,000-point reward thresholds.
 - **Minor, not fixed:** Hydro Fungus immobilize also stuns bosses (+0.01–0.02 for Saurians if removed); the iv prior is faster than the fitted intervals; FLAT_RX ignores the observed 400s.
+
+---
+
+## 2026-10-16 19:00–19:35 — Five-agent panel (QF-A)
+
+Five fresh agents (forecasting, game mechanics, Bayesian statistics, risk management, data/CV) read a briefing of the full project history.
+
+**Round 1: improvements.** Implemented:
+- Sappho splash hits the 3 nearest foes (A2).
+- Bosses ignore immobilize (A2).
+- Anemo/Pyro hits end Freeze (A2).
+- Swirl spreads the absorbed element (A2).
+- Per-replay-group shrinkage (A3).
+- boss_freeze kept from the posterior row (A3).
+- Body counts only from bars ≥30 px (A5).
+- Squad alive-share down-weighted (A5).
+- Break-even, trust-weight sweep and P(reach 16k) in strategies.py (A1, A4).
+
+Not implemented:
+- Crowd recalibration (A1; n = 8).
+- Within-match hedges (A4; one side per match in-game).
+- Low-HP bar re-detection and damage-target relabelling (A5; time).
+
+**Refit v5:** ESS 68. P(per-member squad HP) fell to 0.68. In-sample R16-A M2 rose to 0.77 (was 0.33). QF-A model: M1 0.811, M2 0.773 (pre-registered before the match).
+
+**Round 2:** linear pooling, P = w·model + (1−w)·crowd. Locked crowd: 35% (M1) and 15% (M2).
+
+| Agent | w M1 | w M2 | P(Saurians) | P(Fruity) | λ |
+|---|---|---|---|---|---|
+| 1 forecasting | 30% | 35% | 0.488 | 0.368 | 3e-4 |
+| 2 mechanics | 40% | 30% | 0.53 | 0.34 | 1e-4 |
+| 3 Bayesian | 30% | 35% | 0.488 | 0.368 | 3e-4 |
+| 4 risk | 35% | 30% | 0.511 | 0.337 | 2.5e-4 |
+| 5 data/CV | 35% | 30% | 0.51 | 0.34 | 1e-4 |
+| **Average** | **34%** | **32%** | **0.507** | **0.349** | **2.1e-4** (median 2.5e-4) |
+
+**Allocation:**
+- **λ fixed at 2.1e-4** (the panel average) for Strategy A for the rest of the event.
+- **Shadow (max CE, λ = 2.1e-4):** 100 Saurians + 100 Blazing Beasts. EV 6,342, SD 3,148. On M2, CE is 2,206 for Blazing Beasts vs about 2,160 for Fruity, a near tie.
+- **Dino (max EV):** 100 Saurians + 100 Fruity. EV 8,359, SD 5,433.
+- P(Shadow reaches 16k), assuming ~4,460 points now and 4 future favourite bets: 0.902 for the CE pick vs 0.877 for both underdogs. With only 3 future bets the order flips: 0.602 vs 0.668.
