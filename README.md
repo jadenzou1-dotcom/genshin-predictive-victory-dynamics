@@ -15,7 +15,7 @@ There are 16 simulated battles across 8 rounds (Round of 16 → Final). Each rou
 3. **Simulate.** Run `python sim.py <round>`, e.g. `python sim.py R16-A`. This prints P(left wins), how sensitive that is to the biggest unknowns, and the expected value per emblem for each side.
 4. **Decide.** Run `python strategies.py <round>`. Two strategies run in parallel, one per account: **A (risk-adjusted, main account)** and **B (max-EV, second account)**. A was max-Sharpe for R16-A and R16-B and switches to max certainty equivalent (CE) from here on; see [Strategy decisions](#strategy-decisions). It also scores two paper benchmarks (naive-underdog, crowd-favourite). Commit shortly before the support-rate lock so the multiplier you see is close to final.
    - **Log the crowd.** Before the round closes, add a row per match to `data/crowd_log.csv` with the support rates and multipliers on screen. The game stops showing them once the round ends.
-5. **Calibrate.** After the battle, run `python replay_hp_tracker.py <video> data/replays/<round>_hp_bars.csv` to extract both team HP curves, log winner / remaining HP / wipe time to `data/replays/<round>_outcomes.csv`, note unit behaviour in `data/units.csv` and `notes/`, then run `python calibrate.py` to refit the model to every replay so far, and `python make_results.py` to refresh [RESULTS.md](RESULTS.md). Every change is logged in [`PROCESS.md`](PROCESS.md).
+5. **Calibrate.** After the battle, run `python -m replay.extract <video> <round> data/replays/extracted` (team + unit HP bars, clock, commentary), `python -m replay.observe <round>` (battle-time curves) and `python -m replay.dmg <video> <round>` (damage numbers; `python -m replay.attribute <round>` maps them to attackers). Log winner / remaining HP / wipe time to `data/replays/<round>_outcomes.csv`, note unit behaviour in `data/units.csv` and `notes/`, then run `python calibrate_traj.py 3000 2` to refit the model to every replay so far, and `python make_results.py` to refresh [RESULTS.md](RESULTS.md). Every change is logged in [`PROCESS.md`](PROCESS.md).
 
 ## Payout math
 
@@ -25,18 +25,20 @@ With `p` = true win probability of the side you back and `M` = its multiplier:
 EV per emblem = p·M + (1 − p)·10
 ```
 
-The multiplier is a **step function of support rate**, not a smooth curve (the earlier fit `M ≈ 20 + 28·(1−s)/s` is retired). Observed tiers so far:
+The multiplier is a **step function of support rate**, not a smooth curve (the earlier fit `M ≈ 20 + 28·(1−s)/s` is retired). Support/multiplier pairs seen so far:
 
-| Support rate seen | Multiplier |
-|---|---|
-| 13% | ×200 (cap?) |
-| 17–25% | ×105 |
-| 34–39% | ×70 |
-| 61–66% | ×35 |
-| 75–83% | ×30 |
-| 87% | ×25 |
+| Support | Multiplier | Source |
+|---|---|---|
+| 13% | ×200 (cap?) | own screenshot, pre-lock (R16-A) |
+| 17–25% | ×105 | own screenshots (R16-B locked, QF-A) + Game8 |
+| 27–35% | ×70 | Game8 (27%→×105 also seen there, so the 25/27 edge is fuzzy) |
+| 39% | **×70 (ours) vs ×50 (Game8)** | conflicting: edge near 39% |
+| 61% | **×35 (ours) vs ×40 (Game8)** | conflicting: edge near 61% |
+| 65–70% | ×35 | Game8 |
+| 73–83% | ×30 | own + Game8 |
+| 87–88% | ×25 | own (pre-lock) + Game8 |
 
-Tier edges between these points are unknown. Inside a tier the payout is flat, so a 17% underdog pays the same as a 25% one.
+Tier edges are not known exactly, and displayed support is rounded, so **near 39/61 the multiplier can jump**. Inside a tier the payout is flat, so a 17% underdog pays the same as a 25% one. Always read the multiplier on screen at lock rather than inferring it.
 
 Because the score is linear in emblems and wrong picks still pay, EV maximization puts all emblems on the single best pick. Splitting only buys lower variance.
 
@@ -80,7 +82,7 @@ The model gets more accurate as more battle replays come in:
 
 Group C was entirely unseen units, so the model's edge there was thin (one lean, one coin flip). The quarterfinals are fought by R16 winners whose units will already have been watched in replays. So the plan is to **skip Groups C and D and save emblems for the quarterfinals**, where an emblem should be worth more.
 
-This only works if unused emblems carry over (the counter reads 100/300, which is ambiguous). So it's being tested first: Account A skips Group C, Account B bets it as a control. If A shows 200/300 when Group D opens, rollover is real. Two other caveats: the slider caps at 100 per match, so 300 banked emblems need 3 matches to spend; and every skipped round forgoes at least the 10-per-emblem floor.
+This only works if unused emblems carry over (the counter reads 100/300, which is ambiguous). The plan was to test it (Account A skips Group C, Account B bets it as a control), but in the end both accounts skipped C and D, so the test didn't run. Both accounts later showed 300/300, which is consistent with rollover up to a cap of 300; if 300 is a cap, skipping further rounds wastes emblems. Two other caveats: the slider caps at 100 per match, so 300 banked emblems need 3 matches to spend; and every skipped round forgoes at least the 10-per-emblem floor.
 
 ## Repo layout
 

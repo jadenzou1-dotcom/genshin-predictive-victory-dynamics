@@ -38,7 +38,9 @@ FLAT_RX = 800.0    # transformative reactions (Overloaded, Electro-Charged, Supe
 
 def prior_global():
     return dict(g=HIT_G,                             # fixed by measurement (was a free parameter)
-                k=random.uniform(1.2, 2.5),          # counter multiplier per triangle; hits at exactly 2x base are common
+                k=random.uniform(1.7, 2.3),          # counter multiplier per triangle: replay damage numbers show
+                                                     # exactly 2x base hits on advantaged matchups (R16-A/C), and
+                                                     # 1x when one triangle favours and the other disfavours (Sappho)
                 per_member=float(random.random() < 0.5),
                 freeze_s=random.uniform(0.5, 4.0),   # stun per Freeze
                 amp=random.uniform(1.2, 2.0),        # vaporize/melt multiplier
