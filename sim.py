@@ -57,8 +57,9 @@ def prior_global():
                 drain=math.exp(random.uniform(math.log(1000), math.log(15000))),   # flat HP/s per unit in overtime
                 drain_pct=random.uniform(0.02, 0.15),     # or: fraction of max HP/s per unit in overtime
                 drain_mode=float(random.random() < 0.5),
-                boss_freeze=float(random.random() < 0.5))   # can Boss-tagged units be frozen? one R16-A frame suggests
-                                                             # not; no replay yet decides it, so it stays 50/50  # 1 = flat, 0 = percentage (replay can't yet tell them apart)  # overtime: flat HP/s lost by EVERY unit after the clock (user hypothesis)  # attack-interval increase while Cryo-afflicted (hypothesis)
+                boss_freeze=float(random.random() < 0.25))  # can Boss-tagged units be frozen? R16-A frame sweep: Sappho had
+                                                             # 2 Hydro+Cryo chances, 0 freezes (Lawachurl froze 4x in the same
+                                                             # fight). Weak evidence -> P(freezable) = 0.25, not 0  # 1 = flat, 0 = percentage (replay can't yet tell them apart)  # overtime: flat HP/s lost by EVERY unit after the clock (user hypothesis)  # attack-interval increase while Cryo-afflicted (hypothesis)
 
 def prior_unit():
     # a 100% hit is HIT_G x ATK; skill multipliers seen in replays run 50%-200%, so the average

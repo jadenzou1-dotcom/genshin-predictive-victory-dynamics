@@ -462,3 +462,28 @@ Audit confirmed correct: all winners, all 14 Brier values, QF-A 180° rotations,
 | M2 Fruity | 80.5% | 75% / 86% | 16–17% | 45.0% | 52.7 / 21.0 |
 
 M1 has swung 67.5% → 29% → 30% → 60.5% across model versions, so it is low confidence and still depends on the multiplier tier at lock (breakeven for Saurians: 29% at ×70/×35, 43% at ×50/×40). M2 has favoured Fruity in every version (56–81%). Caveat: the blend weight w was learned from older model versions' pre-match calls.
+
+---
+
+## 2026-10-16 (12:00–12:45) — Hit-size decomposition, Sappho frame study, model v4, CE allocation
+
+**Hit size is DEF × RES, not 0.225 (Jaden's question).** Sorting attributed hits by damage ÷ card ATK, the most common ratio is **0.449** (7 units), not 0.225 (3 units). Genshin's formula gives this exactly. All units are level 80, so the DEF factor = (80+100)/((80+100)+(80+100)) = 0.5; standard 10% RES gives 0.9; product 0.45. The other rungs are skill multipliers: 0.225 = 50%, 0.674 = 150%, 0.908 = 200%. The sim now uses `HIT_G = DEF_FACTOR × RES_FACTOR = 0.45` with the skill-multiplier prior centred at 1.0 (lognormal sd 0.45). Not yet modelled: per-target RES (immune elements are already handled; bosses may have higher RES).
+
+**Sappho frame study (R16-A M2, ~150 frames, subagent):**
+- **Counters don't change damage:** Electro shooter → Sappho 2112 = 0.45×4700 (sim applied ×k), Lawachurl → Sappho 5303 = 0.45×11800, Sappho → shooter squad 8737 = 0.45×19400 (sim applied ÷k). This agrees with the earlier frame check. k prior now 1.0–1.15 (posterior ≈1.08).
+- **Sappho's attacks splash at full damage** (5461 on 3 units at 00:34; 8737 on 3 at 00:26) plus a lingering frost field. Tagged `Splash AoE` in units.csv; the sim applies full damage within aoe_r (no extra 0.5× secondary splash on top).
+- **Freezes last long:** the Lawachurl was frozen 10 s straight at the end. freeze_s prior widened to 0.5–6 s; posterior median 3.6 s (was ~2).
+- **Bosses may be unfreezable.** Over a 0.5 s / 0.25 s sweep, Sappho had 2 Hydro+Cryo chances and 0 freezes, while the Lawachurl froze 4×. New global `boss_freeze`, prior P(freezable) = 0.25 (weak evidence, not 0). No replay identifies it.
+- The sim ran this fight ~2.5× too fast (17.5 s vs 43 s); refitting with the measured hit size should reduce that.
+
+**Refit v4:** EPS 0.10, ESS 42, k ≈ 1.08, freeze_s ≈ 3.6 s, P(flat drain) 0.43. In-sample P(observed winner): A1 0.97, **A2 0.33** (still a miss), B1 0.66, B2 0.60, C1 0.72, C2 0.95.
+
+**QF-A (v4):**
+| | sim | splits | crowd | blend | EV under / fav |
+|---|---|---|---|---|---|
+| M1 Saurians | **52.7%** | boss freezable 23% / not 62.5%; flat 43% / pct 40% | 38–39% | 45.2% | 37.1 / 23.7 |
+| M2 Fruity | **87.5%** | boss-freeze irrelevant; flat 84% / pct 88% | 16–17% | 50.4% | 57.9 / 19.9 |
+
+**`strategies.py` rewritten:** A = max CE = EV − (λ/2)·Var by exhaustive search over side and emblems (steps of 5, cap 100/match, pool default 200); B = max EV; λ sweep printed because λ isn't fixed yet. With blend probabilities, every λ up to 2e-4 gives 100 on Saurians + 100 on Fruity (EV 9,498, SD 5,610); at λ = 5e-4 it switches to both favourites (EV 4,363, SD 1,596).
+
+**Decision risk:** M1's breakeven is 29% at ×70/×35 but 43% at ×50/×40 (Game8 saw ×50 at 39%). At the blend's 45%, Saurians is +EV in both cases, narrowly at ×50. Read the multiplier at lock.
