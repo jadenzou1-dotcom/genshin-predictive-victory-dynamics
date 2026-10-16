@@ -100,6 +100,9 @@ def draw_params(unit_ids, posterior, counts=None):
     for k, v in prior_global().items():
         glob.setdefault(k, v)
     glob["g"] = HIT_G   # measured; never taken from an older posterior row
+    # no replay identifies boss_freeze (trajectory likelihood ratio ~1.1), so it is always drawn
+    # from its evidence-based prior rather than inherited from posterior rows fit under 50/50
+    glob["boss_freeze"] = prior_global()["boss_freeze"]
     units = {}
     for u in unit_ids:
         n = counts.get(u, 0)

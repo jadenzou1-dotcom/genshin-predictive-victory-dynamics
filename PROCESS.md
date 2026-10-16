@@ -487,3 +487,15 @@ M1 has swung 67.5% → 29% → 30% → 60.5% across model versions, so it is low
 **`strategies.py` rewritten:** A = max CE = EV − (λ/2)·Var by exhaustive search over side and emblems (steps of 5, cap 100/match, pool default 200); B = max EV; λ sweep printed because λ isn't fixed yet. With blend probabilities, every λ up to 2e-4 gives 100 on Saurians + 100 on Fruity (EV 9,498, SD 5,610); at λ = 5e-4 it switches to both favourites (EV 4,363, SD 1,596).
 
 **Decision risk:** M1's breakeven is 29% at ×70/×35 but 43% at ×50/×40 (Game8 saw ×50 at 39%). At the blend's 45%, Saurians is +EV in both cases, narrowly at ×50. Read the multiplier at lock.
+
+---
+
+## 2026-10-16 14:30 — Fresh-eyes review before lock
+
+An independent agent with no prior context reviewed the whole pipeline. **Verdict: both picks sound with caveats.**
+- **Fixed:** `boss_freeze` was inherited from posterior rows (fit under a 50/50 prior, weighted mean 0.53), so the raw sim gave M1 0.418 while matches.csv held a hand-mixed 0.527. Since no replay identifies it (likelihood ratio ~1.1), it is now always drawn from its evidence-based prior (P(freezable) = 0.25). Raw sim: **M1 0.521, M2 0.878**, consistent with the hand mixture.
+- **M1** is driven by tuning choices more than data: per-unit shrinkage (all-posterior units → 0.97 if not freezable) and aoe_r (posterior 0.44–0.87 is below the ~1-cell spacing between Fungi, so her splash rarely hits a second Fungus; aoe_r = 1.0 → 0.89). The R16-A M2 in-sample miss (0.31) comes from shrinking Sappho toward the prior. The shrunk model probably underrates Saurians.
+- **M2** depends on per_member: per_member = 0 gives 0.51, = 1 gives 0.92. The posterior is 0.93, and damage numbers confirm squads hit at full card ATK per member (Scout 1033 = 0.449 × 2300, 11×). Other sensitivities stay at 0.73–0.94. The crowd's 17% would need Eremite damage more than 2× the sim's; no mechanism found. The one big earlier model-vs-crowd disagreement (R16-B M1) went to the crowd.
+- **Blend weight w** was fit on v1–v3 calls; its own leave-one-out favours crowd-only. With w = 0, M1 is +EV at ×70/×35 (33.4 vs 25.2) but not at ×50/×40, and M2 is a tie (26.2 vs 26.6). M2 stays +EV for w ≥ ~0.05.
+- **strategies.py** verified correct. Limits: probabilities carry no model uncertainty, and CE ignores the 16,000-point reward thresholds.
+- **Minor, not fixed:** Hydro Fungus immobilize also stuns bosses (+0.01–0.02 for Saurians if removed); the iv prior is faster than the fitted intervals; FLAT_RX ignores the observed 400s.
