@@ -91,8 +91,12 @@ This only works if unused emblems carry over (the counter reads 100/300, which i
 | `data/matches.csv` | One row per match: crowd odds, model probability, pick, result, score. This is the track record |
 | `data/crowd_log.csv` | Timestamped snapshots of each side's support rate and multiplier. The game hides these after the round ends |
 | `sim.py` | Monte Carlo battle model (elements, reactions, kiting, 45 s clock) plus EV calculation |
-| `calibrate.py` | Approximate Bayesian calibration of sim parameters to observed replays |
-| `replay_hp_tracker.py` | OpenCV: extracts both team HP bars from a replay video |
+| `calibrate.py` | Approximate Bayesian calibration of sim parameters to observed replays (3-number summary per replay; superseded by `calibrate_traj.py`) |
+| `calibrate_traj.py` | Kernel ABC calibration against full fight trajectories: both team HP curves and the share of bodies alive, second by second |
+| `replay/` | Replay extraction framework. `extract.py` reads a recording at 10 frames/s: team HP bars, every overhead unit HP bar (`bars.py`), the clock (OCR) and commentary lines (OCR). `observe.py` turns that into per-second battle-time curves |
+| `data/replays/extracted/` | Extractor output per round: `*_frames.csv`, `*_bars.csv`, `*_events.csv` (commentary log), `*_curves.csv` |
+| `blend.py` | Stacks the sim with the crowd's support rate in log-odds space (Bayesian weight, leave-one-out check) |
+| `replay_hp_tracker.py` | OpenCV: extracts both team HP bars from a replay video (older, team bars only) |
 | `data/replays/` | HP-bar traces and observed outcomes per round |
 | `data/calibration_samples.csv` | Weighted posterior parameter draws used by `sim.py` |
 | `strategies.py` | Per-round emblem allocation for Strategies A and B plus paper benchmarks (A still implements max-Sharpe; CE switch pending) |

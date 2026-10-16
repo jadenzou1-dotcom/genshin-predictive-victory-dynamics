@@ -163,12 +163,22 @@ def build(units, plist, G, U):
     return ents
 
 
-def run(units, plist, G, U, dt=0.1):
-    """Simulate one battle. Returns (winner_side, winner_hp_frac, loser_wipe_time or None)."""
+def run(units, plist, G, U, dt=0.1, trace=None):
+    """Simulate one battle. Returns (winner_side, winner_hp_frac, loser_wipe_time or None).
+    If `trace` is a list, one row per simulated second is appended:
+    (t, L team HP fraction, R team HP fraction, L bodies alive, R bodies alive)."""
     ents = build(units, plist, G, U)
     tot = {s: sum(e["max"] for e in ents if e["side"] == s) for s in "LR"}
     t = 0.0
+    next_tr = 0.0
     while t < CLOCK + OVERTIME:
+        if trace is not None and t >= next_tr - 1e-9:
+            trace.append((round(t, 1),
+                          sum(max(e["hp"], 0) for e in ents if e["side"] == "L") / tot["L"],
+                          sum(max(e["hp"], 0) for e in ents if e["side"] == "R") / tot["R"],
+                          sum(e["hp"] > 0 for e in ents if e["side"] == "L"),
+                          sum(e["hp"] > 0 for e in ents if e["side"] == "R")))
+            next_tr += 1.0
         for e in ents:   # healers; Hydro rain optionally wets own team
             if e["hp"] > 0 and e["u"]["heal_allies"]:
                 for f in ents:
