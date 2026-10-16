@@ -192,12 +192,12 @@ The model never sees support rates; "Crowd" is the support rate read as a win pr
 | Team | Saurians Are the Cutest | Little Fungi Clan |
 | Crowd support | 39% | 61% |
 | Multiplier | ×70 | ×35 |
-| Model win chance | 29.1% | 70.9% |
+| Model win chance | 30.3% | 69.7% |
 
 - **Winner:** pending
-- **Model's call:** Little Fungi Clan (70.9%)
+- **Model's call:** Little Fungi Clan (69.7%)
 - **Crowd's call:** Little Fungi Clan (61%)
-- **Notes:** early snapshot; all units seen; recalibrated on 6 replays incl. R16-C (23 draws, P(flat drain)=0.78); drain split flat 0.360 / pct 0.198; pre-C-calibration was 0.675
+- **Notes:** all units seen; trajectory calibration on 6 replays (ESS 96, P(flat drain)=0.42); drain split flat 0.544 / pct 0.183; sim reproduces Sappho R16-A win only 34% in-sample, so likely underrates Saurians
 
 ### Match 2: Mirror Fruity Order vs Unofficial Blazing Beasts Members
 
@@ -206,12 +206,12 @@ The model never sees support rates; "Crowd" is the support rate read as a win pr
 | Team | Mirror Fruity Order | Unofficial Blazing Beasts Members |
 | Crowd support | 17% | 83% |
 | Multiplier | ×105 | ×30 |
-| Model win chance | 55.7% | 44.3% |
+| Model win chance | 70.7% | 29.3% |
 
 - **Winner:** pending
-- **Model's call:** Mirror Fruity Order (55.7%)
+- **Model's call:** Mirror Fruity Order (70.7%)
 - **Crowd's call:** Unofficial Blazing Beasts Members (83%)
-- **Notes:** early snapshot; all units seen; recalibrated on 6 replays incl. R16-C (23 draws, P(flat drain)=0.78); drain split flat 0.527 / pct 0.832; pre-C-calibration was 0.576
+- **Notes:** all units seen; trajectory calibration on 6 replays (ESS 96, P(flat drain)=0.42); drain split flat 0.605 / pct 0.785
 
 <details><summary>Crowd snapshots this round</summary>
 

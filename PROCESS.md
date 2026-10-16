@@ -397,3 +397,36 @@ Match 2 is effectively a coin flip that hinges on one mechanic. A percentage dra
 - **Open-world wiki data not used.** Event units have custom HP/ATK and event-only mechanics, and the sim has no RES term, so open-world RES values and attack patterns don't map onto any sim parameter.
 - **Multiplier is a step function.** README payout section rewritten with the observed tiers.
 - **Known bug:** `sim.py` defines `tempered()` but never calls it; Group C's tempered numbers were computed outside the main loop. Irrelevant for QF-A (all seen); fix before a round with new units.
+
+---
+
+## 2026-10-15/16 — Replay extraction framework + trajectory calibration
+
+**Why.** Calibration used 3 numbers per replay (winner, winner HP, wipe time), which throws away almost everything a recording shows.
+
+**`replay/` (new).** `extract.py` reads a recording at 10 frames/s and logs:
+- both team HP bars (as before);
+- every overhead unit HP bar (`bars.py`): ~4 px bars, bright red = left, light blue = right, with the dark segment beside each giving lost HP. Gives per-frame visible bodies per side and each body's HP fraction. Validated against lineups: R16-C M1 reads 5 vs 6 bars, R16-B M1 Fruity 15 of 16 bodies;
+- the match clock (OCR, rapidocr) to align video time to battle time;
+- commentary lines (OCR, de-duplicated) with clock times. These form an event log: e.g. R16-A "Ladler of Broth's followers are dropping one by one" at 0:26; R16-B "Mechanoid Assistant couldn't provide support in time" at 0:20; R16-C "Fontemer Aberrants trigger Overloaded deliberately"; R16-D "Round-and-Frost froze every opponent" at 0:21.
+
+`observe.py` turns this into per-second battle-time curves: team HP L/R and share of bodies alive L/R. Alive count = rolling max over 5 s (bridges occlusion) followed by a running minimum (dead stays dead), normalised by the opening count.
+
+**Not done: damage numbers.** Small, semi-transparent and stacked; three OCR approaches gave unstable reads (the same crop read 1375 / 13756 / 1342), so they're excluded rather than adding noise. Next attempt would be template matching on the game's digit glyphs.
+
+**`sim.run(..., trace=[])`** records team HP and bodies alive every simulated second.
+
+**`calibrate_traj.py` (new).** Kernel ABC on the whole fight: d = RMSE(team HP, both sides) + 0.5·RMSE(alive share) + 0.25·[wrong winner]. Alive share is only used for a side whose opening bar count matches its body count ±25% (bosses can carry extra bars). Distances are stored and the tolerance is picked afterwards: smallest EPS with effective sample ≥ 40. Run: 3,000 draws, EPS = 0.15, **ESS 96** (old method: 23 draws). Previous posterior kept as `data/calibration_samples_summary_only.csv`.
+
+Posterior changes: **squad HP is per member** (settled); **P(flat overtime drain) 0.78 → 0.42**; g ≈ 0.08 (0.06–0.11), counter k ≈ 1.44 (1.19–1.79), AoE radius ≈ 0.63 cells.
+
+**Retrodiction (in-sample, P(sim picks the observed winner)):** A1 0.97, A2 0.34, B1 0.61, B2 0.57, C1 0.70, C2 0.79. **A2 is a systematic miss:** Saurians ("Sappho") won R16-A as a 13% underdog, and even after fitting, the sim gives her only 34%. (Correction: an earlier chat note said Sappho lost R16-A; she won.)
+
+**QF-A after trajectory calibration:**
+| | sim | flat / pct drain | crowd | blend |
+|---|---|---|---|---|
+| M1 Saurians | 30% | 54% / 18% | 38–39% | 35% |
+| M2 Fruity | 71% | 61% / 79% | 16–17% | 39% |
+Treat M1's 30% as a likely underestimate given the A2 miss. M2 favours Fruity in every version of the model so far.
+
+**Community research.** Event names: 判测胜券本征 (CN), 勝者は誰だ！？ (JP). CN sources (Bilibili, 3DM, TapTap, 17173) carry pick videos and announcements, no mechanics. JP: Game8 logs support from start to end of each round and the multipliers; 100 emblems/day; bets can be changed until the match starts; daily participation is required for that day's Primogems (≥5 prediction days for full rewards). The on-screen "300/300" may be a cap, which would make skipping a day lose emblems; unconfirmed. Game8 saw 39% → ×50 and 61% → ×40, while we saw 39% → ×70 and 61% → ×35, so there is a tier edge near 39/61. No public source gives the overtime formula or unit stats.
