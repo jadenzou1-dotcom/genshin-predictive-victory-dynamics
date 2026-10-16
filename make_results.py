@@ -36,9 +36,11 @@ crowd = load(CROWD)
 
 # ---- headline numbers -------------------------------------------------------
 decided = [m for m in matches if m["winner"] in ("L", "R")]
+# head-to-head only on matches the model actually predicted, so both columns share a denominator
+scored = [m for m in decided if num(m["model_p_left"]) is not None]
 model_right = crowd_right = 0
 bm, bc = [], []
-for m in decided:
+for m in scored:
     p = num(m["model_p_left"])
     s = num(m["left_support_pct"])
     if p is not None and (p > 0.5) == (m["winner"] == "L"):
@@ -61,13 +63,14 @@ lines = [
     "",
     "| | Model | Crowd |",
     "|---|---|---|",
-    f"| Correct calls (side given >50%) | {model_right} / {len(decided)} | {crowd_right} / {len(decided)} |",
+    f"| Correct calls (side given >50%) | {model_right} / {len(scored)} | {crowd_right} / {len(scored)} |",
 ]
 if bm and bc:
     lines.append(f"| Mean Brier score (lower is better) | {sum(bm) / len(bm):.3f} | {sum(bc) / len(bc):.3f} |")
 lines += [
     "",
-    "The model never sees support rates; \"Crowd\" is the support rate read as a win probability.",
+    "The model never sees support rates; \"Crowd\" is the support rate read as a win probability. "
+    f"Scored on the {len(scored)} matches the model predicted ({len(decided) - len(scored)} decided matches had no model prediction).",
     "",
 ]
 

@@ -374,3 +374,14 @@ Match 2 is effectively a coin flip that hinges on one mechanic. A percentage dra
 ## 2026-10-15 — Readable results page
 
 `data/matches.csv` is the record but is hard to read on GitHub. New `make_results.py` generates `RESULTS.md` from `matches.csv` and `crowd_log.csv`: a model-vs-crowd scoreboard (correct calls, mean Brier), then one card per match (support, multipliers, model win chance, winner, picks, notes) and the round's crowd snapshots. The CSVs remain the source of truth. The hand-maintained results table in the README was replaced with a link, so there's one copy.
+
+---
+
+## 2026-10-15 — Group C and D results logged (no picks in either)
+
+- **Results.** R16-C: Reserve Grenadier Squad beat Seahorse and Crab (final support 85/15); A Little Chubby Crisis beat Consecrated Beast Frightfest (23/77, crowd favourite lost). R16-D: What Does the Ninken Say? beat Simple-Soul Hilichurl Fighters (82/18); Round-and-Frost Assault beat Ultra-Ancient Heavy Assault Formation (34/66).
+- **No picks.** Both screens show "Did Not Participate" for C and D. C was skipped on purpose; D was missed. No model prediction exists for D, and its units aren't in `units.csv` yet.
+- **Multipliers unavailable.** The post-round screen shows support rates but not multipliers to non-participants. Multiplier columns left blank rather than estimated. Side note: the observed pairs (21/22/25% → ×105, 75/78/79% → ×30, 87% → ×25, 13% → ×200) look like a step function, not the smooth `20 + 28·(1−s)/s` fit in the README (which gives ~120 at 21–22%). Worth revisiting before the next allocation.
+- **Brier.** C1 model 0.148 / crowd 0.023; C2 model 0.240 / crowd 0.593. Crowd Brier uses the final post-round rates (early snapshots were 82/18 and 22/78, kept in `crowd_log.csv`).
+- **Overtime hint (weak).** C2 hinged on drain type: flat → 36% L, percentage → ~100% L. Chubby Crisis won, which is one data point toward percentage drain. Not confirmed until the C2 replay is checked for whether it went to overtime.
+- **`make_results.py` fix.** The scoreboard counted D (no model prediction) as model misses. Now both columns are scored only on matches the model predicted.
