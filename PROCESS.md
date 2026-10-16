@@ -430,3 +430,35 @@ Posterior changes: **squad HP is per member** (settled); **P(flat overtime drain
 Treat M1's 30% as a likely underestimate given the A2 miss. M2 favours Fruity in every version of the model so far.
 
 **Community research.** Event names: 判测胜券本征 (CN), 勝者は誰だ！？ (JP). CN sources (Bilibili, 3DM, TapTap, 17173) carry pick videos and announcements, no mechanics. JP: Game8 logs support from start to end of each round and the multipliers; 100 emblems/day; bets can be changed until the match starts; daily participation is required for that day's Primogems (≥5 prediction days for full rewards). The on-screen "300/300" may be a cap, which would make skipping a day lose emblems; unconfirmed. Game8 saw 39% → ×50 and 61% → ×40, while we saw 39% → ×70 and 61% → ×35, so there is a tier edge near 39/61. No public source gives the overtime formula or unit stats.
+
+---
+
+## 2026-10-16 (01:00–02:10) — Damage numbers, two independent audits, model v3
+
+**Damage-number reader (`replay/dmg.py`, `replay/attribute.py`).** Colour masks failed: Cryo/Hydro numbers share colours with ice effects and HP bars. The working version uses a text detector (rapidocr DBNet) on each half of the frame upscaled 1.6x at 5 frames/s. Reads are grouped into pops (same value, nearby, within 1.2 s of first appearance). The per-match vocabulary is values seen in ≥3 distinct pops, minus fragments (752/175 inside 1752) and merges. Output is `*_hits.csv`: match, battle time, value, element (from colour), target side (from the HP bar below the number). Frame-checked precision: values ~75–85% right (stacked numbers are the main failure); element and target tags are noisier. Reaction numbers are salmon-coloured and get mislabelled.
+
+**Measured from frames, verified independently by a second agent:**
+- **Normal hit = 0.225 × card ATK:** Sternshield Crab 2269/10.1k, Pyroslinger Bracer 658/2.9k, Red Vulture 4202/18.7k, Hailstorm Cannoneer 2202/9.8k. Now fixed in the sim (`HIT_G`); g is no longer a free parameter. Previously the sim fitted g ≈ 0.08 and compensated with attacks ~3x too fast.
+- **Skill ladder:** many hits land at exactly 2× or 3× base (0.449/0.674 × ATK). An earlier reading of the 2× hits as a **counter bonus was wrong.** The verifying agent found the same attacker hitting one target for 1236 and 2472 back to back (Desert Clearwater, R16-B), and disadvantaged attackers hitting at 2× (Galehunter on Big Bro). The counter range was briefly narrowed to 1.7–2.3 on the wrong reading, then reverted to 1.0–2.5. Unit damage-per-attack prior is now centred at 1.3× base (lognormal sd 0.4) to cover the ladder.
+- **Transformative reactions deal flat damage:** 400/800 recur dozens of times across attackers with very different ATK. Overloaded / Electro-Charged / Superconduct now deal a flat 800 (through Geo Ward) instead of a ×1.15–1.25 multiplier. Unclear: 400 lands mostly on the right side and 800 mostly on the left in R16-C M1, so the split may depend on side or target.
+
+**Audit 1 (code/data review), fixed:**
+- the old posterior's g was overriding the new fixed HIT_G (now forced in `draw_params`);
+- alive-share curves were biased: deaths showed ~2 s late (now a forward-looking window) and the loser never reached 0 at the wipe (curves now anchored to the logged wipe time, loser set to 0);
+- calibration kept the best of 20 unit draws instead of sampling by weight (overconfident unit posteriors); fixed;
+- damage clean-up counted frames not pops, kept fragments, and chained repeated hits; fixed;
+- README tier table now lists sources and the 39/61 conflict (ours ×70/×35 vs Game8 ×50/×40);
+- README workflow updated; rollover note corrected (both accounts skipped C and D, so the planned control test never ran).
+Audit confirmed correct: all winners, all 14 Brier values, QF-A 180° rotations, blend math, counter directions vs the legend.
+
+**Refit (v3):** `calibrate_traj.py 3000 2` → EPS 0.10 (tighter than v2's 0.15), ESS 70. Posterior: k ≈ 1.25 (1.06–1.58), amp ≈ 1.56, AoE radius ≈ 0.62, P(flat drain) = 0.42, squad HP per member.
+
+**In-sample retrodiction P(observed winner):** A1 0.98, A2 0.27, B1 0.67, B2 0.51, C1 0.72, C2 0.92. A2 (Saurians/Sappho beating Frostarm as a 13% underdog) is still a systematic miss.
+
+**QF-A (v3):**
+| | sim | flat / pct drain | crowd | blend | EV under / fav (blend) |
+|---|---|---|---|---|---|
+| M1 Saurians | 60.5% | 65% / 55% | 38–39% | 48.8% | 39.3 / 22.8 |
+| M2 Fruity | 80.5% | 75% / 86% | 16–17% | 45.0% | 52.7 / 21.0 |
+
+M1 has swung 67.5% → 29% → 30% → 60.5% across model versions, so it is low confidence and still depends on the multiplier tier at lock (breakeven for Saurians: 29% at ×70/×35, 43% at ×50/×40). M2 has favoured Fruity in every version (56–81%). Caveat: the blend weight w was learned from older model versions' pre-match calls.

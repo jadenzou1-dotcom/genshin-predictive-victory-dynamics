@@ -38,9 +38,9 @@ FLAT_RX = 800.0    # transformative reactions (Overloaded, Electro-Charged, Supe
 
 def prior_global():
     return dict(g=HIT_G,                             # fixed by measurement (was a free parameter)
-                k=random.uniform(1.7, 2.3),          # counter multiplier per triangle: replay damage numbers show
-                                                     # exactly 2x base hits on advantaged matchups (R16-A/C), and
-                                                     # 1x when one triangle favours and the other disfavours (Sappho)
+                k=random.uniform(1.0, 2.5),          # counter multiplier per triangle. NOT measured: 2x-base hits
+                                                     # occur on advantaged AND disadvantaged matchups (same attacker
+                                                     # shows 1x and 2x on one target), i.e. a skill ladder, not counters
                 per_member=float(random.random() < 0.5),
                 freeze_s=random.uniform(0.5, 4.0),   # stun per Freeze
                 amp=random.uniform(1.2, 2.0),        # vaporize/melt multiplier
@@ -53,9 +53,10 @@ def prior_global():
                 drain_mode=float(random.random() < 0.5))  # 1 = flat, 0 = percentage (replay can't yet tell them apart)  # overtime: flat HP/s lost by EVERY unit after the clock (user hypothesis)  # attack-interval increase while Cryo-afflicted (hypothesis)
 
 def prior_unit():
-    # per-hit damage is measured (HIT_G), so dmg only absorbs multi-hit attacks and skill
-    # variety (narrow); attack interval carries the speed and is learned from HP curves
-    return dict(dmg=random.lognormvariate(0, 0.3), iv=random.uniform(1.0, 6.0))
+    # normal hits are measured (HIT_G); units also land skill hits at 2x and 3x base (replay
+    # damage numbers), so the average damage per attack is centred ~1.3x with spread for the
+    # unknown skill mix. Attack interval carries the speed and is learned from HP curves.
+    return dict(dmg=random.lognormvariate(math.log(1.3), 0.4), iv=random.uniform(1.0, 6.0))
 
 
 def load_posterior():
