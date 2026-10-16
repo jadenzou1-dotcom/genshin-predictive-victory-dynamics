@@ -1,68 +1,98 @@
-"""Allocate one round's emblems under each strategy.
+"""Allocate one round's emblems.
 
-Reads data/matches.csv (model_p_left + multipliers) for a round and prints:
-  A  max-Sharpe      : tangency portfolio, weights ∝ excess EV / variance
-  B  max-EV          : everything on the single highest-EV leg
-  benchmarks (paper only, not played):
-    naive-underdog   : split evenly across the highest-multiplier side of each match
-    crowd-favourite  : split evenly across the most-supported side of each match
+Each match is an independent binary bet: emblems e on a side with win probability p and
+multiplier M score e*M if it wins and e*10 if it loses. Up to CAP (100) emblems per match.
 
-Each match is an independent binary bet. Excess EV is measured over the
-guaranteed 10 points per emblem. Assumes one shared pool of emblems per round.
+  A  max-CE   : maximise CE = EV - (lambda/2) * Var over the side and emblem count of every
+                match (exhaustive grid). lambda = risk aversion; lambda = 0 is pure EV.
+  B  max-EV   : CAP on the higher-EV side of every match (every emblem earns >= 10, so EV
+                is maximised by spending the cap on the better side of each match)
+  benchmarks (paper only): naive-underdog, crowd-favourite (CAP on that side of each match)
 
-Usage: python strategies.py <round> [emblems]
+Probabilities come from blend.py (sim stacked with the crowd) unless --model is given,
+which uses the raw sim probability. A lambda sweep is printed because lambda has not
+been fixed yet (README "Strategy decisions" #2).
+
+Usage: python strategies.py <round> [--pool N] [--lambda L] [--model]
 """
-import csv, math, sys
+import argparse, csv
 from pathlib import Path
+import blend
 
-FLOOR = 10
-rnd = sys.argv[1]
-POOL = int(sys.argv[2]) if len(sys.argv) > 2 else 100
+FLOOR, CAP = 10, 100
+ap = argparse.ArgumentParser()
+ap.add_argument("round")
+ap.add_argument("--pool", type=int, default=2 * CAP, help="emblems available this round")
+ap.add_argument("--lambda", dest="lam", type=float, default=None)
+ap.add_argument("--model", action="store_true", help="use raw sim probability instead of the blend")
+a = ap.parse_args()
 
-legs = []
-for m in csv.DictReader(open(Path(__file__).parent / "data" / "matches.csv")):
-    if m["round"] != rnd or not m["model_p_left"]: continue
-    pl = float(m["model_p_left"])
-    for side, team, p, mult, sup in (("L", m["left_team"], pl, float(m["left_mult"]), float(m["left_support_pct"])),
-                                     ("R", m["right_team"], 1 - pl, float(m["right_mult"]), float(m["right_support_pct"]))):
-        mu = p * mult + (1 - p) * FLOOR
-        sd = (mult - FLOOR) * math.sqrt(p * (1 - p))
-        legs.append(dict(match=m["match"], side=side, team=team, p=p, mult=mult, sup=sup,
-                         mu=mu, sd=sd, sharpe=(mu - FLOOR) / sd if sd else 0))
+matches = blend.load()
+train = blend.training_rows(matches)
+games = []
+for m in matches:
+    if m["round"] != a.round or not m["model_p_left"]:
+        continue
+    pm, pc = float(m["model_p_left"]), float(m["left_support_pct"]) / 100
+    p = pm if a.model else blend.predict(train, pm, pc)
+    games.append(dict(match=m["match"], sides=[
+        dict(team=m["left_team"], p=p, M=float(m["left_mult"]), sup=float(m["left_support_pct"])),
+        dict(team=m["right_team"], p=1 - p, M=float(m["right_mult"]), sup=float(m["right_support_pct"]))]))
 
-def stats(w):  # w: list of emblem counts aligned with legs (independent across matches)
-    mu = sum(x * l["mu"] for x, l in zip(w, legs))
-    var = sum((x * l["sd"]) ** 2 for x, l in zip(w, legs))
-    sd = math.sqrt(var)
-    return mu, sd, (mu - FLOOR * sum(w)) / sd if sd else float("inf")
 
-def show(name, w):
-    mu, sd, sh = stats(w)
-    picks = ", ".join(f"{x:.0f} on {l['team']} (M{l['match']})" for x, l in zip(w, legs) if x >= 0.5)
-    print(f"{name:18s} EV {mu:6.0f}  SD {sd:6.0f}  Sharpe {sh:5.2f}   {picks}")
+def leg(s, e):
+    """EV and variance of e emblems on side s."""
+    ev = e * (s["p"] * s["M"] + (1 - s["p"]) * FLOOR)
+    var = (e * (s["M"] - FLOOR)) ** 2 * s["p"] * (1 - s["p"])
+    return ev, var
 
-print(f"Per-emblem legs, {rnd}:")
-for l in legs:
-    print(f"  M{l['match']} {l['team'][:30]:30s} p={l['p']:.3f} x{l['mult']:<4g} EV {l['mu']:5.1f} SD {l['sd']:5.1f} Sharpe {l['sharpe']:.2f}")
+
+def best_ce(lam, pool):
+    """Exhaustive search (side x emblems in steps of 5) for max CE under the pool limit."""
+    best = None
+    def rec(i, left, ev, var, picks):
+        nonlocal best
+        if i == len(games):
+            ce = ev - lam / 2 * var
+            if best is None or ce > best[0]:
+                best = (ce, ev, var, picks)
+            return
+        for si, s in enumerate(games[i]["sides"]):
+            for e in range(0, min(CAP, left) + 1, 5):
+                lev, lvar = leg(s, e)
+                rec(i + 1, left - e, ev + lev, var + lvar, picks + [(e, s["team"], games[i]["match"])])
+    rec(0, pool, 0.0, 0.0, [])
+    return best
+
+
+def show(name, ev, var, picks):
+    txt = ", ".join(f"{e} on {t} (M{m})" for e, t, m in picks if e)
+    print(f"{name:22s} EV {ev:7.0f}  SD {var ** 0.5:6.0f}   {txt}")
+
+
+src = "raw sim" if a.model else "sim+crowd blend"
+print(f"{a.round}: probabilities from {src}; pool {a.pool}, cap {CAP}/match")
+for g in games:
+    for s in g["sides"]:
+        ev1, var1 = leg(s, 1)
+        print(f"  M{g['match']} {s['team'][:32]:32s} p={s['p']:.3f} x{s['M']:<4g} EV/emblem {ev1:5.1f}")
 print()
+lams = [a.lam] if a.lam is not None else [0.0, 2e-5, 5e-5, 1e-4, 2e-4, 5e-4]
+for lam in lams:
+    ce, ev, var, picks = best_ce(lam, a.pool)
+    show(f"A  max-CE  lambda={lam:g}", ev, var, picks)
 
-# A: tangency. Can't hold both sides of one match, so per match keep the higher-Sharpe side.
-best = {}
-for i, l in enumerate(legs):
-    if l["match"] not in best or l["sharpe"] > legs[best[l["match"]]]["sharpe"]:
-        best[l["match"]] = i
-raw = {i: (legs[i]["mu"] - FLOOR) / legs[i]["sd"] ** 2 for i in best.values()}
-tot = sum(raw.values())
-show("A  max-Sharpe", [POOL * raw.get(i, 0) / tot for i in range(len(legs))])
-
-# B: max EV, corner solution
-top = max(range(len(legs)), key=lambda i: legs[i]["mu"])
-show("B  max-EV", [POOL if i == top else 0 for i in range(len(legs))])
+picks, ev, var = [], 0.0, 0.0
+for g in games:
+    s = max(g["sides"], key=lambda s: leg(s, 1)[0])
+    e = min(CAP, a.pool - sum(p[0] for p in picks))
+    lev, lvar = leg(s, e); ev += lev; var += lvar; picks.append((e, s["team"], g["match"]))
+show("B  max-EV", ev, var, picks)
 
 print("\nPaper benchmarks (not played):")
-for name, key in (("naive-underdog", "mult"), ("crowd-favourite", "sup")):
-    sel = {}
-    for i, l in enumerate(legs):
-        if l["match"] not in sel or l[key] > legs[sel[l["match"]]][key]:
-            sel[l["match"]] = i
-    show(name, [POOL / len(sel) if i in sel.values() else 0 for i in range(len(legs))])
+for name, key in (("naive-underdog", "M"), ("crowd-favourite", "sup")):
+    picks, ev, var = [], 0.0, 0.0
+    for g in games:
+        s = max(g["sides"], key=lambda s: s[key])
+        lev, lvar = leg(s, CAP); ev += lev; var += lvar; picks.append((CAP, s["team"], g["match"]))
+    show(name, ev, var, picks)
