@@ -30,8 +30,13 @@ UNIT_KEYS = ("dmg", "iv")
 
 
 # ---------------------------------------------------------------- priors
-HIT_G = 0.225      # damage per normal hit / card ATK, measured from replay damage numbers (R16-C:
-                   # Crab 2269/10.1k, Bracer 658/2.9k, Red Vulture 4202/18.7k, Cannoneer 2202/9.8k)
+# Damage per 100% hit / card ATK = DEF factor x RES factor. All units are level 80, so
+# DEF factor = (80+100)/((80+100)+(80+100)) = 0.5; standard enemy RES 10% -> 0.9. Product 0.45.
+# Measured from replay damage numbers: 7 units hit at 0.449x ATK (Electro Cicin, Hydro Fungus,
+# Ladler, Electro Shooter, Electro Specter, Galehunter, Seahorse); other hits sit on a skill
+# ladder at 0.5x / 1.5x / 2x of that (0.225, 0.674, 0.908).
+DEF_FACTOR, RES_FACTOR = 0.5, 0.9
+HIT_G = DEF_FACTOR * RES_FACTOR
 FLAT_RX = 800.0    # transformative reactions (Overloaded, Electro-Charged, Superconduct) deal a flat
                    # amount: 400/800 recur dozens of times regardless of attacker ATK (R16-C)
 
@@ -53,10 +58,10 @@ def prior_global():
                 drain_mode=float(random.random() < 0.5))  # 1 = flat, 0 = percentage (replay can't yet tell them apart)  # overtime: flat HP/s lost by EVERY unit after the clock (user hypothesis)  # attack-interval increase while Cryo-afflicted (hypothesis)
 
 def prior_unit():
-    # normal hits are measured (HIT_G); units also land skill hits at 2x and 3x base (replay
-    # damage numbers), so the average damage per attack is centred ~1.3x with spread for the
-    # unknown skill mix. Attack interval carries the speed and is learned from HP curves.
-    return dict(dmg=random.lognormvariate(math.log(1.3), 0.4), iv=random.uniform(1.0, 6.0))
+    # a 100% hit is HIT_G x ATK; skill multipliers seen in replays run 50%-200%, so the average
+    # multiplier per attack is centred at 1.0 with that spread. Attack interval carries speed
+    # and is learned from the HP curves.
+    return dict(dmg=random.lognormvariate(0.0, 0.45), iv=random.uniform(1.0, 6.0))
 
 
 def load_posterior():
