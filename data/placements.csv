@@ -1,0 +1,58 @@
+round,match,team,side,unit_id,row,col
+R16-A,1,The Mysterious Howl Crew,L,electro_cicin,1,2
+R16-A,1,The Mysterious Howl Crew,L,ladler_of_broth,2,1
+R16-A,1,The Mysterious Howl Crew,L,electro_cicin,2,3
+R16-A,1,The Mysterious Howl Crew,L,hydro_cicin,3,3
+R16-A,1,The Mysterious Howl Crew,L,hydro_cicin,4,2
+R16-A,1,Little Fungi Clan,R,floating_anemo_fungus,1,4
+R16-A,1,Little Fungi Clan,R,winged_cryoshroom,1,5
+R16-A,1,Little Fungi Clan,R,floating_hydro_fungus,2,4
+R16-A,1,Little Fungi Clan,R,floating_anemo_fungus,3,4
+R16-A,1,Little Fungi Clan,R,floating_hydro_fungus,4,4
+R16-A,1,Little Fungi Clan,R,winged_cryoshroom,4,5
+R16-A,2,Frostarm and Shaman Formation,L,pyro_hilichurl_shooter,1,2
+R16-A,2,Frostarm and Shaman Formation,L,hydro_samachurl,1,3
+R16-A,2,Frostarm and Shaman Formation,L,frostarm_lawachurl,2,1
+R16-A,2,Frostarm and Shaman Formation,L,electro_hilichurl_shooter,4,2
+R16-A,2,Frostarm and Shaman Formation,L,anemo_samachurl,4,3
+R16-A,2,Saurians Are the Cutest,R,sappho_amidst_the_waves,3,4
+R16-B,1,Elemental Dye Experts,L,cryo_specter,1,2
+R16-B,1,Elemental Dye Experts,L,electro_specter,2,3
+R16-B,1,Elemental Dye Experts,L,hydro_mimic_finch,2,5
+R16-B,1,Elemental Dye Experts,L,pyro_specter,4,2
+R16-B,1,Mirror Fruity Order,R,treasure_hoarder_pyro_potioneer,1,4
+R16-B,1,Mirror Fruity Order,R,treasure_hoarder_pyro_potioneer,1,5
+R16-B,1,Mirror Fruity Order,R,treasure_hoarder_handyman,2,2
+R16-B,1,Mirror Fruity Order,R,treasure_hoarder_handyman,3,2
+R16-B,1,Mirror Fruity Order,R,treasure_hoarder_scout,2,4
+R16-B,1,Mirror Fruity Order,R,treasure_hoarder_scout,3,4
+R16-B,1,Mirror Fruity Order,R,treasure_hoarder_pyro_potioneer,4,4
+R16-B,1,Mirror Fruity Order,R,treasure_hoarder_pyro_potioneer,4,5
+R16-B,2,Unofficial Blazing Beasts Members,L,eremite_sunfrost,1,2
+R16-B,2,Unofficial Blazing Beasts Members,L,eremite_scorching_loremaster,2,3
+R16-B,2,Unofficial Blazing Beasts Members,L,eremite_galehunter,3,3
+R16-B,2,Unofficial Blazing Beasts Members,L,eremite_desert_clearwater,4,2
+R16-B,2,"Rude-a-Lot, Hats-a-Not",R,big_bro_rude_a_lot,1,5
+R16-B,2,"Rude-a-Lot, Hats-a-Not",R,big_bro_rude_a_lot,2,4
+R16-B,2,"Rude-a-Lot, Hats-a-Not",R,mechanoid_assistant,3,4
+R16-B,2,"Rude-a-Lot, Hats-a-Not",R,big_bro_rude_a_lot,4,5
+R16-C,1,Reserve Grenadier Squad,L,fatui_cryogunner_legionnaire,1,2
+R16-C,1,Reserve Grenadier Squad,L,oprichniki_hailstorm_cannoneer,1,3
+R16-C,1,Reserve Grenadier Squad,L,wislawa,2,3
+R16-C,1,Reserve Grenadier Squad,L,fatui_pyroslinger_bracer,4,2
+R16-C,1,Reserve Grenadier Squad,L,oprichniki_hailstorm_cannoneer,4,3
+R16-C,1,Seahorse and Crab,R,bubbler_seahorse,1,5
+R16-C,1,Seahorse and Crab,R,sternshield_crab,2,4
+R16-C,1,Seahorse and Crab,R,sternshield_crab,2,6
+R16-C,1,Seahorse and Crab,R,bubbler_seahorse,3,4
+R16-C,1,Seahorse and Crab,R,bubbler_seahorse,3,6
+R16-C,1,Seahorse and Crab,R,sternshield_crab,4,5
+R16-C,2,A Little Chubby Crisis,L,electro_slime,1,2
+R16-C,2,A Little Chubby Crisis,L,pyro_slime,1,3
+R16-C,2,A Little Chubby Crisis,L,boulder_little,2,1
+R16-C,2,A Little Chubby Crisis,L,hydro_slime,2,3
+R16-C,2,A Little Chubby Crisis,L,hydro_slime,3,3
+R16-C,2,A Little Chubby Crisis,L,electro_slime,4,2
+R16-C,2,A Little Chubby Crisis,L,pyro_slime,4,3
+R16-C,2,Consecrated Beast Frightfest,R,consecrated_scorpion,1,5
+R16-C,2,Consecrated Beast Frightfest,R,consecrated_red_vulture,4,5

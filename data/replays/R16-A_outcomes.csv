@@ -1,0 +1,3 @@
+round,match,winner_side,winner_hp_frac,loser_wiped_at_s,source
+R16-A,1,R,0.54,35,OpenCV HP-bar tracking of replay (replay_hp_tracker.py)
+R16-A,2,R,0.26,43,OpenCV HP-bar tracking of replay (replay_hp_tracker.py)
