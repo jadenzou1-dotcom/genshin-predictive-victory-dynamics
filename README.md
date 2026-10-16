@@ -15,7 +15,7 @@ There are 16 simulated battles across 8 rounds (Round of 16 → Final). Each rou
 3. **Simulate.** Run `python sim.py <round>`, e.g. `python sim.py R16-A`. This prints P(left wins), how sensitive that is to the biggest unknowns, and the expected value per emblem for each side.
 4. **Decide.** Run `python strategies.py <round>`. Two strategies run in parallel, one per account: **A (risk-adjusted, main account)** and **B (max-EV, second account)**. A was max-Sharpe for R16-A and R16-B and switches to max certainty equivalent (CE) from here on; see [Strategy decisions](#strategy-decisions). It also scores two paper benchmarks (naive-underdog, crowd-favourite). Commit shortly before the support-rate lock so the multiplier you see is close to final.
    - **Log the crowd.** Before the round closes, add a row per match to `data/crowd_log.csv` with the support rates and multipliers on screen. The game stops showing them once the round ends.
-5. **Calibrate.** After the battle, run `python replay_hp_tracker.py <video> data/replays/<round>_hp_bars.csv` to extract both team HP curves, log winner / remaining HP / wipe time to `data/replays/<round>_outcomes.csv`, note unit behaviour in `data/units.csv` and `notes/`, then run `python calibrate.py` to refit the model to every replay so far. Every change is logged in [`PROCESS.md`](PROCESS.md).
+5. **Calibrate.** After the battle, run `python replay_hp_tracker.py <video> data/replays/<round>_hp_bars.csv` to extract both team HP curves, log winner / remaining HP / wipe time to `data/replays/<round>_outcomes.csv`, note unit behaviour in `data/units.csv` and `notes/`, then run `python calibrate.py` to refit the model to every replay so far, and `python make_results.py` to refresh [RESULTS.md](RESULTS.md). Every change is logged in [`PROCESS.md`](PROCESS.md).
 
 ## Payout math
 
@@ -87,14 +87,10 @@ This only works if unused emblems carry over (the counter reads 100/300, which i
 | `strategies.py` | Per-round emblem allocation for Strategies A and B plus paper benchmarks (A still implements max-Sharpe; CE switch pending) |
 | `allocation_curve.py` | Sweeps Strategy A splits and plots Sharpe / EV / SD to `charts/` |
 | `notes/` | Per-round analysis and replay observations |
+| `RESULTS.md` | Readable results page generated from the CSVs by `make_results.py` (don't edit by hand) |
 | `PROCESS.md` | How the model was developed, every assumption, and a dated change log |
 | `SKILLS.md` | Skills used and developed to build this project |
 
 ## Results so far
 
-| Round | Match | Crowd (left) | Model (left, pre-match) | Pick | Winner |
-|---|---|---|---|---|---|
-| R16-A | Howl Crew vs Fungi Clan | 25% | 8.5% | A: Fungi | **Fungi** ✓ |
-| R16-A | Frostarm vs Saurians | 87% | 88.1% | A: Frostarm, B: Saurians | **Saurians** (B ✓) |
-| R16-B | Elemental Dye vs Mirror Fruity | 21% | 78.5% | A: 28 Dye, B: 100 Dye | **Mirror Fruity** ✗ |
-| R16-B | Blazing Beasts vs Rude-a-Lot | 78% | 60.5% | A: 72 Blazing Beasts | **Blazing Beasts** (A ✓) |
+See **[RESULTS.md](RESULTS.md)**: every match with crowd support, multipliers, the model's call, the winner and Brier scores, plus the crowd snapshots for each round. It's generated from the CSVs by `python make_results.py`.

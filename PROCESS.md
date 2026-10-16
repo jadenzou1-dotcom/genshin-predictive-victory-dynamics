@@ -368,3 +368,9 @@ Match 2 is effectively a coin flip that hinges on one mechanic. A percentage dra
 - **Saving emblems (decided 2026-10-13).** Jaden's reasoning: the model improves with every replay (cumulative calibration, per-unit shrinkage `n/(n+2)`, tempering for unseen lineups), and the quarterfinals will be fought by units already seen. So skip Groups C and D and spend saved emblems in the quarterfinals. Rollover is unconfirmed, so Group C doubles as a test: Account A skips, Account B bets as a control. This mixes a rollover test into the A-vs-B comparison for one round.
 - **New file `data/crowd_log.csv`.** Support rates and multipliers disappear once a round ends, so each on-screen snapshot is now logged with a timestamp and whether the rate had locked. Backfilled from earlier screenshots. R16-C multipliers weren't recorded.
 - README now has a "Strategy decisions" section covering the Sharpe finding, the CE switch and the saving plan.
+
+---
+
+## 2026-10-15 — Readable results page
+
+`data/matches.csv` is the record but is hard to read on GitHub. New `make_results.py` generates `RESULTS.md` from `matches.csv` and `crowd_log.csv`: a model-vs-crowd scoreboard (correct calls, mean Brier), then one card per match (support, multipliers, model win chance, winner, picks, notes) and the round's crowd snapshots. The CSVs remain the source of truth. The hand-maintained results table in the README was replaced with a link, so there's one copy.
