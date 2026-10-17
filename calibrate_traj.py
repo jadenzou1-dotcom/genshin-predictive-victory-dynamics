@@ -149,19 +149,25 @@ if __name__ == "__main__":
           + ("" if ess(w) >= TARGET_ESS else "  (TARGET NOT REACHED: posterior is thin)"))
     random.seed(12345)
     kept = []
+    # Every row is kept (not only high-weight ones) together with, per match, its likelihood
+    # lik.<round>_<match> and the unit draw picked for that match (<round>_<match>|<unit>.<key>).
+    # loo.py divides one match's likelihood out of the weights to get honest leave-one-out
+    # predictions without refitting (panel agent 3).
+    keys = [f"{o['round']}_{o['match']}" for o in obs]
     for (row, ds), wi in zip(results, w):
-        if wi > 1e-6:
-            for dl, Ul, mids in ds:
-                ks = [math.exp(-0.5 * (d / eps) ** 2) for d in dl]
-                U = random.choices(Ul, weights=ks)[0] if sum(ks) > 0 else Ul[min(range(len(dl)), key=dl.__getitem__)]
-                for u in mids:
-                    for k in sim.UNIT_KEYS: row[f"{u}.{k}"] = U[u][k]
-            row["weight"] = wi; kept.append(row)
+        for key, (dl, Ul, mids) in zip(keys, ds):
+            ks = [math.exp(-0.5 * (d / eps) ** 2) for d in dl]
+            row[f"lik.{key}"] = sum(ks) / len(ks)
+            U = random.choices(Ul, weights=ks)[0] if sum(ks) > 0 else Ul[min(range(len(dl)), key=dl.__getitem__)]
+            for u in mids:
+                for k in sim.UNIT_KEYS:
+                    row[f"{u}.{k}"] = U[u][k]; row[f"{key}|{u}.{k}"] = U[u][k]
+        row["weight"] = wi; kept.append(row)
     print(f"{len(kept)} draws with non-negligible weight")
     cols = list(kept[0].keys())
     with open(ROOT / "data" / "calibration_samples.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=cols); w.writeheader()
-        for r in kept: w.writerow({k: f"{r.get(k, 0):.4g}" for k in cols})
+        for r in kept: w.writerow({k: f"{r.get(k, 0):.6g}" for k in cols})
 
     def q(xs):
         pairs = sorted(zip(xs, (r["weight"] for r in kept))); tot = sum(w for _, w in pairs); out = []
