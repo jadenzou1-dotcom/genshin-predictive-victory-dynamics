@@ -73,7 +73,7 @@ CE = EV − (λ/2) · Var
 
 over the emblem split. EV counts in full, so a bigger payout always makes a bet better, and risk is a separate penalty set by one dial, λ (risk aversion). λ = 0 is pure EV (Strategy B), and larger λ trades EV for steadiness. This is the textbook mean-variance utility Sharpe itself comes from: with leverage, max-CE means "hold the max-Sharpe portfolio, scaled by 1/λ". Without leverage that scaling step isn't available, so CE is optimized directly. λ is fixed once for the rest of the event so the A-vs-B comparison stays clean. R16-A and R16-B stay logged as max-Sharpe rounds.
 
-**λ fixed (2026-10-16):** a five-agent panel recommended 3e-4, 1e-4, 3e-4, 2.5e-4 and 1e-4; Strategy A uses their average, **λ = 2.1e-4**, for the rest of the event. Model-vs-crowd trust from the same panel (linear pooling): 34% model on QF-A M1, 32% on M2. **Standard from now on (Jaden, 2026-10-16): P = 0.35·model + 0.65·crowd for every match**, rather than re-fitting a weight per battle.
+**λ fixed (2026-10-16):** a five-agent panel recommended 3e-4, 1e-4, 3e-4, 2.5e-4 and 1e-4; Strategy A uses their average, **λ = 2.1e-4**, for the rest of the event. Model-vs-crowd trust from the same panel (linear pooling): 34% model on QF-A M1, 32% on M2. Standard (2026-10-16): 35% model / 65% crowd. **Updated 2026-10-17 after QF-A (panel round 3): ~60% model when all units have been seen in replays, ~35% when key units are unseen; λ ≈ 0 (panel average 4.2e-5) once the 16k tier is guaranteed by the ×10 floor.**
 
 ### 3. Saving emblems for later rounds, when the model knows more
 

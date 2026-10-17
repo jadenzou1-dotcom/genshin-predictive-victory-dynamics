@@ -561,3 +561,43 @@ Not implemented:
 **Caveat:** v5's mechanics (Sappho splash, bar filter, boss freeze, etc.) were discovered by studying these same replays. LOO removes parameter leakage but not structural leakage, so 0.102 is optimistic. The at-time 0.254 is the honest record.
 
 **Trust weight re-fit on 8 calls.** Linear pooling log loss is minimised at w_model ≈ 0.75–0.80 (0.720 vs 0.774 at 0.35 and 0.924 crowd-only). blend.py's Bayesian log-odds weight is now 0.56 (80% interval 0.28–0.83). Leave-one-out log loss: model 0.735, blend 0.762, crowd 0.924.
+
+---
+
+## 2026-10-17 20:00 — QF-B panel (round 3)
+
+**New units (cards read):**
+- Swiftshadow Ninken: AoE, Ranged, Cannot Target Flying, 70k/10.8k, Electro. Post-kill AoE plunge not modelled.
+- Nobushi: Kikouban: Single-Target, Ranged, 25k/5.3k, Physical/Electro.
+- Large Hydro Slime: Squad ×2, Ranged, 14k/3.9k, immobilize, Hydro-immune.
+- Large Cryo Slime: Squad ×2, Ranged, 13k/3.9k, Cryo-immune. Cryo shell approximated as a shield.
+
+**Model:** QF-B M1 Grenadier 0.609 (per_member 1 → 0.41, 0 → 0.92). M2 Ninken 0.563 (all units unseen). Crowd locked at 77/23 for both, ×30/×105.
+
+**Panel trust (linear pooling):**
+
+| Agent | M1 | M2 | λ |
+|---|---|---|---|
+| A1 | 55 | 30 | 2.1e-4 |
+| A2 | 60 | 35 | 0 |
+| A3 | 60 | 30 | 0 |
+| A4 | 60 | 35 | 0 |
+| A5 | 60 | 35 | 0 |
+| **Average** | **59%** | **33%** | **4.2e-5** (median 0) |
+
+**New standard:** ~60% model when all units are seen, ~35% when they are unseen (replaces 35/65).
+
+**Final P(left):** M1 0.675 (Chubby 0.325), M2 0.702 (Round-and-Frost 0.298). Both underdogs are +EV even on the crowd's numbers alone (0.23 > 0.174 break-even).
+
+**λ → ~0.** If Shadow's ~12.7k points are real, the ×10 floor on the remaining 500 emblems guarantees the 16k tier, so variance no longer matters.
+
+**Pacing:** all 5 agents say bet 200 per account tonight. 500 emblems remain (300 now + 2 × 100) against 5 match slots (2 tonight, 2 SF, 1 Final) × 100 = 500. Any emblem held back is stranded at the Final cap.
+
+**Mechanics flagged for M2:**
+- Electro-Charged and Superconduct from the slimes' own auras are not modelled (favours Ninken).
+- R16-D Cryo-slime hits read 578 ≈ 0.15 × ATK, below the 0.45 rule (favours Ninken).
+- The Cryo shell may be tougher than modelled (favours Round-and-Frost).
+
+**Allocations:**
+- 200 per account: Shadow and Dino both 100 Chubby + 100 Round-and-Frost (EV 7,921).
+- 100 per account: Shadow 65 Chubby + 35 Round-and-Frost; Dino 100 Chubby.
