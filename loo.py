@@ -30,13 +30,24 @@ for o, key in zip(obs, keys):
         appears.setdefault(p["unit_id"], set()).add(key)
 
 
-def loo(m_key):
+ORDER = ["R16-A", "R16-B", "R16-C", "R16-D", "QF-A", "QF-B", "SF", "Final"]
+
+
+def allowed_keys(m_key, mode):
+    """'loo': every other replay. 'past': only replays from rounds before m's round."""
+    rnd = m_key.rsplit("_", 1)[0]
+    if mode == "loo":
+        return [k for k in keys if k != m_key]
+    return [k for k in keys if ORDER.index(k.rsplit("_", 1)[0]) < ORDER.index(rnd)]
+
+
+def loo(m_key, mode="loo", target=None):
+    """P(left) for match m_key (a 'round_match' string) using only the allowed replays."""
+    use = allowed_keys(m_key, mode)
     lw = []
     for r in post:
         s = 0.0
-        for k in keys:
-            if k == m_key:
-                continue
+        for k in use:
             v = float(r.get(f"lik.{k}", 0))
             if v <= 0:
                 s = -math.inf; break
@@ -44,19 +55,24 @@ def loo(m_key):
         lw.append(s)
     mx = max(lw)
     w = [math.exp(x - mx) if x > -math.inf else 0.0 for x in lw]
+    if not use:                      # nothing allowed: plain prior draws
+        w = [1.0] * len(post)
     ess = sum(w) ** 2 / sum(x * x for x in w)
     rnd, mt = m_key.rsplit("_", 1)
     pl = sim.match_units(places, rnd, mt)
+    allowed = set(use)
     ids = sorted({p["unit_id"] for p in pl})
+    from itertools import accumulate
+    cw = list(accumulate(w))
     random.seed(7)
     left = 0
     for _ in range(N):
-        row = random.choices(post, weights=w)[0]
+        row = random.choices(post, cum_weights=cw)[0]
         G = {k: float(row[k]) for k in sim.GLOBAL_KEYS if k in row}
         G["g"] = sim.HIT_G
         U = {}
         for u in ids:
-            others = sorted(appears.get(u, set()) - {m_key})
+            others = sorted(appears.get(u, set()) & allowed)
             n = len(others)
             if n and random.random() < n / (n + sim.SHRINK_N0) and f"{others[0]}|{u}.dmg" in row:
                 src = random.choice(others)
@@ -68,6 +84,8 @@ def loo(m_key):
 
 
 if __name__ == "__main__":
-    for k in keys:
-        p, ess = loo(k)
-        print(f"{k}: LOO P(left) = {p:.3f}   (LOO effective sample {ess:.0f})")
+    targets = sys.argv[2].split(",") if len(sys.argv) > 2 else keys
+    for k in targets:
+        p, ess = loo(k, "loo")
+        q, ess2 = loo(k, "past")
+        print(f"{k}: LOO P(left) = {p:.3f} (ESS {ess:.0f})   past-only P(left) = {q:.3f} (ESS {ess2:.0f})")

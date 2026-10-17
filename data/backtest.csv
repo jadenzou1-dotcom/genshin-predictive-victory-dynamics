@@ -1,0 +1,11 @@
+match,left_team,right_team,model_at_time_p_left,model_version_at_time,loo_p_left_v5,past_only_p_left_v5,crowd_left_pct,winner,notes
+R16-A_1,The Mysterious Howl Crew,Little Fungi Clan,0.085,v1 prior,0.009,0.008,25,R,
+R16-A_2,Frostarm and Shaman Formation,Saurians Are the Cutest,0.881,v1 prior,0.232,0.237,87,R,"at-time model and crowd both wrong; v5 LOO right (Sappho splash fix found by studying this replay: structural leakage)"
+R16-B_1,Elemental Dye Experts,Mirror Fruity Order,0.785,v1 calibrated on R16-A,0.490,0.526,21,R,v5 LOO ~coin flip
+R16-B_2,Unofficial Blazing Beasts Members,"Rude-a-Lot, Hats-a-Not",0.605,v1 calibrated on R16-A,0.447,0.476,78,L,v5 LOO leans wrong side
+R16-C_1,Reserve Grenadier Squad,Seahorse and Crab,0.615,v2 tempered,0.649,0.662,85,L,
+R16-C_2,A Little Chubby Crisis,Consecrated Beast Frightfest,0.510,v2 tempered,0.943,0.935,23,L,
+R16-D_1,What Does the Ninken Say?,Simple-Soul Hilichurl Fighters,,,,,82,L,units not logged; cannot simulate
+R16-D_2,Ultra-Ancient Heavy Assault Formation,Round-and-Frost Assault,,,,,34,R,units not logged; cannot simulate
+QF-A_1,Saurians Are the Cutest,Little Fungi Clan,0.811,v5,0.820,0.820,35,L,QF-A replay not yet in calibration so LOO = past-only
+QF-A_2,Mirror Fruity Order,Unofficial Blazing Beasts Members,0.773,v5,0.757,0.757,15,L,QF-A replay not yet in calibration so LOO = past-only

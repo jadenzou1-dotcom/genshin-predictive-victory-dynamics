@@ -542,3 +542,22 @@ Not implemented:
 - P(Shadow reaches 16k), assuming ~4,460 points now and 4 future favourite bets: 0.902 for the CE pick vs 0.877 for both underdogs. With only 3 future bets the order flips: 0.602 vs 0.668.
 
 **Follow-up (19:45):** each account bets 100 emblems total tonight, backloading the rest for later rounds. Standard pooling is fixed at **35% model / 65% crowd** for every match (panel average 33%). At 35/65: P(Saurians) = 0.511, P(Fruity) = 0.368. EV of 100 emblems: Saurians 4,068, Fungi 2,222, Fruity 4,496, Blazing Beasts 2,264. **Shadow** (max CE, λ = 2.1e-4): 65 Saurians + 35 Fruity (EV 4,218, SD 2,524). **Dino** (max EV): 100 Fruity.
+
+---
+
+## 2026-10-16 22:20 — QF-A results and backtest
+
+**QF-A: both underdogs won.** Saurians (35% crowd, ×70) beat Little Fungi Clan, and Mirror Fruity Order (15%, ×105) beat Blazing Beasts. The v5 model favoured both (0.811 and 0.773). Scoreboard on 8 modelled matches: **model 6/8, Brier 0.254; crowd 4/8, Brier 0.334.** Model–crowd disagreements (model > 0.5 on the crowd's underdog): R16-B M1 (model wrong), R16-C M2, QF-A M1 and QF-A M2 (model right), so 3 of 4.
+
+**Backtest (`data/backtest.csv`, `loo.py`).** calibrate_traj.py now stores each draw's per-match likelihood and per-match unit picks. The leave-one-out posterior is the same draws reweighted by the product over the other matches, so no refits are needed. "Past-only" uses replays from earlier rounds only. Both use model v5.
+
+| Column | Correct | Brier |
+|---|---|---|
+| Model at the time (v1–v5) | 6/8 | 0.254 |
+| v5 leave-one-out | 7/8 | 0.102 |
+| v5 past-only | 6/8 | 0.102 |
+| Crowd | 4/8 | 0.334 |
+
+**Caveat:** v5's mechanics (Sappho splash, bar filter, boss freeze, etc.) were discovered by studying these same replays. LOO removes parameter leakage but not structural leakage, so 0.102 is optimistic. The at-time 0.254 is the honest record.
+
+**Trust weight re-fit on 8 calls.** Linear pooling log loss is minimised at w_model ≈ 0.75–0.80 (0.720 vs 0.774 at 0.35 and 0.924 crowd-only). blend.py's Bayesian log-odds weight is now 0.56 (80% interval 0.28–0.83). Leave-one-out log loss: model 0.735, blend 0.762, crowd 0.924.
