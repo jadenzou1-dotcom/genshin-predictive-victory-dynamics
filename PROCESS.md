@@ -631,3 +631,28 @@ Not implemented:
 The model's outcome distribution is bimodal: whichever side wins, it usually wins clearly. "60/40" means 60% of simulated battles are clear wins for one side and 40% for the other, not that the typical battle is close. Both observed wins were *less* decisive than the model's typical favourite win (M1 even went to overtime), so the margins give no evidence that the model understated the favourites.
 
 **Pooling weight re-check (10 calls, linear pool, log loss):** w = 0 → 0.791, 0.35 → 0.689, 0.6 → 0.667, 0.7 → 0.667, 1.0 → 0.696. Optimum is 0.6–0.7, so the ~60% standard for seen units stands.
+
+---
+
+## 2026-10-18 19:30 — Semifinal predictions
+
+Locked support and multipliers (19:26 ET): M1 Fruity 58% ×40 vs Saurians 42% ×50; M2 Grenadier 47% ×50 vs Ninken 53% ×40. Placements read off the board screenshots: Fruity and Grenadier keep their QF layouts; Sappho at (3,4); Ninken at (4,5), Kikoubans at (1–3,4).
+
+**Model (refit on 10 replays, 4,000 runs):** P(Fruity) 0.848, P(Grenadier) 0.859.
+
+**Sensitivity (posterior split on each uncertain mechanic):**
+- M1: 0.72–0.89. Mainly per_member (0.72 if off, 0.89 if on); 0.72 with every unit drawn from the prior.
+- M2: 0.82–0.88 across every split; 0.87 with units from the prior.
+
+**Pooled at the ~60% standard (all units seen):** P(Fruity) 0.741, P(Grenadier) 0.703. Break-evens: Fruity 0.571, Grenadier 0.429. Grenadier is +EV even on crowd numbers alone (0.47 > 0.429); Fruity only barely (0.58 vs 0.571).
+
+| Option | P | Mult | EV / emblem |
+|---|---|---|---|
+| Fruity | 0.741 | ×40 | 32.2 |
+| Saurians | 0.259 | ×50 | 20.4 |
+| Grenadier | 0.703 | ×50 | 38.1 |
+| Ninken | 0.297 | ×40 | 18.9 |
+
+**Allocations (200 per account, cap 300/match):**
+- Shadow (CE, λ = 2.1e-4): 76 Fruity + 124 Grenadier (EV 7,178, SD 2,476).
+- Dino (EV): 200 Grenadier (EV 7,627, SD 3,654).
