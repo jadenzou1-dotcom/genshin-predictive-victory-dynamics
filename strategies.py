@@ -4,7 +4,7 @@ Each match is an independent binary bet: emblems e on a side with win probabilit
 multiplier M score e*M if it wins and e*10 if it loses. Up to CAP (100) emblems per match.
 
   A  max-CE   : maximise CE = EV - (lambda/2) * Var over the side and emblem count of every
-                match (exhaustive grid). lambda = risk aversion; lambda = 0 is pure EV.
+                match (coarse 5-emblem grid, then 1-emblem refinement). lambda = risk aversion; lambda = 0 is pure EV.
   B  max-EV   : CAP on the higher-EV side of every match (every emblem earns >= 10, so EV
                 is maximised by spending the cap on the better side of each match)
   benchmarks (paper only): naive-underdog, crowd-favourite (CAP on that side of each match)
@@ -26,6 +26,7 @@ ap.add_argument("--pool", type=int, default=2 * CAP, help="emblems available thi
 ap.add_argument("--lambda", dest="lam", type=float, default=None)
 ap.add_argument("--model", action="store_true", help="use raw sim probability instead of the blend")
 ap.add_argument("--w", type=float, default=None, help="fixed model weight in the log-odds blend (0 = crowd only)")
+ap.add_argument("--linw", default=None, help="per-match model trust for linear pooling, e.g. 0.59,0.33 (P = w*model + (1-w)*crowd)")
 ap.add_argument("--have", type=float, default=None, help="prediction points already earned (enables P(>=16000))")
 ap.add_argument("--future-p", type=float, default=0.68, help="win prob of a typical future favourite bet")
 ap.add_argument("--future-n", type=int, default=4, help="future 100-emblem favourite bets (x30) after tonight")
@@ -38,7 +39,12 @@ for m in matches:
     if m["round"] != a.round or not m["model_p_left"]:
         continue
     pm, pc = float(m["model_p_left"]), float(m["left_support_pct"]) / 100
-    p = pm if a.model else (blend.blend(pm, pc, a.w) if a.w is not None else blend.predict(train, pm, pc))
+    if a.linw:   # linear pooling with per-match trust weights (the panel standard)
+        wl = [float(x) for x in a.linw.split(",")]
+        wm = wl[min(len(games), len(wl) - 1)]
+        p = wm * pm + (1 - wm) * pc
+    else:
+        p = pm if a.model else (blend.blend(pm, pc, a.w) if a.w is not None else blend.predict(train, pm, pc))
     games.append(dict(match=m["match"], pm=pm, pc=pc, sides=[
         dict(team=m["left_team"], p=p, M=float(m["left_mult"]), sup=float(m["left_support_pct"])),
         dict(team=m["right_team"], p=1 - p, M=float(m["right_mult"]), sup=float(m["right_support_pct"]))]))
@@ -51,8 +57,8 @@ def leg(s, e):
     return ev, var
 
 
-def best_ce(lam, pool):
-    """Exhaustive search (side x emblems in steps of 5) for max CE under the pool limit."""
+def _search(lam, pool, options):
+    """Exhaustive search over options[i] = [(side index, emblems), ...] per match."""
     best = None
     def rec(i, left, ev, var, picks):
         nonlocal best
@@ -61,12 +67,29 @@ def best_ce(lam, pool):
             if best is None or ce > best[0]:
                 best = (ce, ev, var, picks)
             return
-        for si, s in enumerate(games[i]["sides"]):
-            for e in range(0, min(CAP, left) + 1, 5):
-                lev, lvar = leg(s, e)
-                rec(i + 1, left - e, ev + lev, var + lvar, picks + [(e, s["team"], games[i]["match"])])
+        for si, e in options[i]:
+            if e > left:
+                continue
+            s = games[i]["sides"][si]
+            lev, lvar = leg(s, e)
+            rec(i + 1, left - e, ev + lev, var + lvar, picks + [(e, s["team"], games[i]["match"], si)])
     rec(0, pool, 0.0, 0.0, [])
     return best
+
+
+def best_ce(lam, pool, coarse=5):
+    """Two-stage search for max CE under the pool limit (lam = 0 gives max EV).
+    Stage 1: both sides x emblems in steps of `coarse` finds the strategy (which side, roughly
+    how many). Stage 2: every emblem count within +-coarse of the stage-1 amount, both sides
+    (so a coarse 0 can still flip to a few emblems on either side), in steps of 1."""
+    opts = [[(si, e) for si in (0, 1) for e in range(0, CAP + 1, coarse)] for _ in games]
+    _, _, _, picks = _search(lam, pool, opts)
+    fine = []
+    for (e0, _, _, si0) in picks:
+        sides = (0, 1) if e0 == 0 else (si0,)
+        fine.append([(si, e) for si in sides for e in range(max(0, e0 - coarse), min(CAP, e0 + coarse) + 1)])
+    ce, ev, var, picks = _search(lam, pool, fine)
+    return ce, ev, var, [p[:3] for p in picks]
 
 
 def show(name, ev, var, picks):
@@ -74,7 +97,7 @@ def show(name, ev, var, picks):
     print(f"{name:22s} EV {ev:7.0f}  SD {var ** 0.5:6.0f}   {txt}")
 
 
-src = "raw sim" if a.model else "sim+crowd blend"
+src = f"linear pool w={a.linw}" if a.linw else ("raw sim" if a.model else "sim+crowd blend")
 print(f"{a.round}: probabilities from {src}; pool {a.pool}, cap {CAP}/match")
 for g in games:
     for s in g["sides"]:
@@ -86,11 +109,7 @@ for lam in lams:
     ce, ev, var, picks = best_ce(lam, a.pool)
     show(f"A  max-CE  lambda={lam:g}", ev, var, picks)
 
-picks, ev, var = [], 0.0, 0.0
-for g in games:
-    s = max(g["sides"], key=lambda s: leg(s, 1)[0])
-    e = min(CAP, a.pool - sum(p[0] for p in picks))
-    lev, lvar = leg(s, e); ev += lev; var += lvar; picks.append((e, s["team"], g["match"]))
+_, ev, var, picks = best_ce(0.0, a.pool)
 show("B  max-EV", ev, var, picks)
 
 print("\nPaper benchmarks (not played):")
