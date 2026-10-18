@@ -610,3 +610,24 @@ Not implemented:
 - **Shadow:** 50 Chubby + 50 Round-and-Frost (EV 3,965, SD 3,111). **Dino:** 100 Chubby (EV 4,099).
 
 **Update 2026-10-17 late:** strategies.py now searches in two stages (5-emblem coarse, then 1-emblem refine) and takes `--linw` for linear pooling. Exact QF-B split: **Shadow 52 Chubby + 48 Round-and-Frost** (EV 3,970, SD 3,117); Dino 100 Chubby (EV 4,099). Handoff notes for a new session: HANDOFF.md.
+
+---
+
+## 2026-10-18 — QF-B results, replay, refit, margin check
+
+**Results:** both favourites won (Grenadier, Ninken). Both accounts were on the underdogs: 100 emblems × 10 = 1,000 each. Model called both (0.607, 0.564); crowd called both (77%). Scoreboard over 10 modelled matches: model 8/10, Brier 0.238; crowd 6/10, Brier 0.278.
+
+**Replay:** M1 went to overtime. Chubby's bar was 0.015 at 00:00 and they were wiped about 1.5 s later; Grenadier's bar was 0.53 at 00:00 and read 0.41 after the overtime switch (possible bar rescale). M2: Round-and-Frost wiped at τ ≈ 28 (clock 00:17), Ninken about 0.54 HP left.
+
+**Refit (10 replays):** EPS 0.15, ESS 124. Weighted P(per_member) went from 0.74 to 0.62.
+
+**Did the battles look more one-sided than "60/40" implies?** (Jaden's question.) `margin_check.py` places each observed outcome in the model's own simulated distribution of outcomes, using the pre-QF-B posterior and replay counts:
+
+| | Pre-QF-B P(left) | Median favourite-win HP | Median wipe time | Observed | Percentile of signed margin |
+|---|---|---|---|---|---|
+| M1 | 0.611 | 0.46 | 29 s | 0.41 HP, 46.5 s (overtime) | 65th |
+| M2 | 0.569 | 0.66 | 19 s | 0.54 HP, 28 s | 59th |
+
+The model's outcome distribution is bimodal: whichever side wins, it usually wins clearly. "60/40" means 60% of simulated battles are clear wins for one side and 40% for the other, not that the typical battle is close. Both observed wins were *less* decisive than the model's typical favourite win (M1 even went to overtime), so the margins give no evidence that the model understated the favourites.
+
+**Pooling weight re-check (10 calls, linear pool, log loss):** w = 0 → 0.791, 0.35 → 0.689, 0.6 → 0.667, 0.7 → 0.667, 1.0 → 0.696. Optimum is 0.6–0.7, so the ~60% standard for seen units stands.
