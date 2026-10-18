@@ -608,3 +608,5 @@ Not implemented:
 - QF-A replay extracted. Commentary: "Sappho has some trouble with airborne enemies. She keeps missing" (still won, in overtime). Refit on 8 replays: ESS 83, EPS 0.15, P(per_member) 0.74.
 - QF-B model: M1 0.607, M2 0.564. Pooled at 59% / 33%: P(Chubby) 0.326, P(Round-and-Frost) 0.298.
 - **Shadow:** 50 Chubby + 50 Round-and-Frost (EV 3,965, SD 3,111). **Dino:** 100 Chubby (EV 4,099).
+
+**Update 2026-10-17 late:** strategies.py now searches in two stages (5-emblem coarse, then 1-emblem refine) and takes `--linw` for linear pooling. Exact QF-B split: **Shadow 52 Chubby + 48 Round-and-Frost** (EV 3,970, SD 3,117); Dino 100 Chubby (EV 4,099). Handoff notes for a new session: HANDOFF.md.

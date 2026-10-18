@@ -1,5 +1,7 @@
 # Genshin Impact — Predictive Victory Dynamics Model
 
+> New session? Start with [HANDOFF.md](HANDOFF.md) for the current state and the per-round workflow.
+
 A small quantitative model for betting on Genshin Impact's *Predictive Victory Dynamics* event (October 2026). In the event, players place Victory Emblems on one of two simulated armies, and a crowd-driven multiplier pays more for backing the less popular side.
 
 The goal is to beat the crowd's support rate by combining (1) a Monte Carlo battle simulation built from each unit's listed stats and skills with (2) the event's payout math.
