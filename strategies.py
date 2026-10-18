@@ -19,7 +19,7 @@ import argparse, csv
 from pathlib import Path
 import blend
 
-FLOOR, CAP = 10, 100
+FLOOR, CAP = 10, 300   # in-game slider allows up to 300 emblems on one match (Jaden, 2026-10-17)
 ap = argparse.ArgumentParser()
 ap.add_argument("round")
 ap.add_argument("--pool", type=int, default=2 * CAP, help="emblems available this round")
