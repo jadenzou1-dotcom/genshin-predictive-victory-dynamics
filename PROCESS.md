@@ -601,3 +601,10 @@ Not implemented:
 **Allocations:**
 - 200 per account: Shadow and Dino both 100 Chubby + 100 Round-and-Frost (EV 7,921).
 - 100 per account: Shadow 65 Chubby + 35 Round-and-Frost; Dino 100 Chubby.
+
+**Update 20:20:**
+- Rules (Jaden): up to **300 emblems per match**; the Final has a 1st-place and a 3rd-place match (2 matches). strategies.py cap raised to 300. Jaden's pacing plan is 100 tonight, 200 at SF, 200 at the Final.
+- Shadow's goal is "maximize score, minimize risk", not the 16k tier, so the panel's λ ≈ 0 (which rested on the 16k argument) is not used. **Shadow stays at λ = 2.1e-4.** Verified points: Shado 12,685, Dino 31,500.
+- QF-A replay extracted. Commentary: "Sappho has some trouble with airborne enemies. She keeps missing" (still won, in overtime). Refit on 8 replays: ESS 83, EPS 0.15, P(per_member) 0.74.
+- QF-B model: M1 0.607, M2 0.564. Pooled at 59% / 33%: P(Chubby) 0.326, P(Round-and-Frost) 0.298.
+- **Shadow:** 50 Chubby + 50 Round-and-Frost (EV 3,965, SD 3,111). **Dino:** 100 Chubby (EV 4,099).
