@@ -656,3 +656,29 @@ Locked support and multipliers (19:26 ET): M1 Fruity 58% ×40 vs Saurians 42% ×
 **Allocations (200 per account, cap 300/match):**
 - Shadow (CE, λ = 2.1e-4): 76 Fruity + 124 Grenadier (EV 7,178, SD 2,476).
 - Dino (EV): 200 Grenadier (EV 7,627, SD 3,654).
+
+**Update 19:55 — SF panel (round 4).** Jaden asked whether ignoring attack combos (e.g. 3 swings then a pause) undermines the predictions, and for a panel on trust and on sim improvements.
+
+| Agent | w M1 | w M2 | Combo test (mean DPS fixed) | Ninken plunge test (×3 / ×5–6 ATK AoE, not refit) |
+|---|---|---|---|---|
+| A1 | 0.50 | 0.50 | ±0.01 | M2 0.76 / 0.72 |
+| A2 | 0.50 | 0.50 | ≤0.02 | M2 0.76 / 0.70 |
+| A3 | 0.55 | 0.50 | ≤0.03 (noise ±0.017) | M2 0.77 / 0.72 |
+| A4 | 0.50 | 0.55 | ≤0.01 | M2 0.77 / 0.70 |
+| A5 | 0.55 | 0.55 | ≤0.02 | (Ninken dmg ×1.5 → 0.72) |
+| **Average** | **0.53** | **0.52** | | |
+
+Why below the 0.6 standard: M1 hinges on per_member (0.72 off / 0.89 on, posterior 0.62) in a single-boss-vs-squads matchup; M2 is robust on modelled mechanics, but the Ninken team has been seen once and its post-kill plunge and Electro/Cryo reactions are not modelled.
+
+**Combo verdict (unanimous):** with average DPS held fixed, combo timing moved P by ≤0.03, which is within Monte Carlo noise. Over 30–45 s fights timing averages out; it only matters for a few large threshold hits (Ninken plunge, Sappho freeze → shatter), which are better modelled as specific mechanics.
+
+**Improvement priorities (panel consensus):**
+1. Ninken post-kill plunge, refit on QF-B (all 5 agents ranked it first or second). Cuts M2 by 0.08–0.15 before refit; no flip.
+2. Settle per_member from squad HP-bar steps in existing replays (biggest M1 swing).
+3. Fit damage per hit from on-screen damage numbers (Sappho, Ninken, Kikouban).
+4. Superconduct and Electro-Charged from the units' own elemental auras.
+5. Target-selection AI; overtime drain mode.
+
+**Final (pooled at 0.53 / 0.52):** P(Fruity) 0.722 (EV 31.7 vs 21.1), P(Grenadier) 0.672 (EV 36.9 vs 19.8). Even worst-case plunge-adjusted model numbers pool above both break-evens.
+- **Shadow:** 86 Fruity + 114 Grenadier (EV 6,928, SD 2,433).
+- **Dino:** 200 Grenadier (EV 7,378, SD 3,755).
