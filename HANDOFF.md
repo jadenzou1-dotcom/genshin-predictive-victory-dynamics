@@ -1,4 +1,4 @@
-# Handoff: start here (state as of 2026-10-18 late)
+# Handoff: start here (state as of 2026-10-19 morning)
 
 New session: read this file first, then README.md (method, tier table, strategy decisions) and the last sections of PROCESS.md (dated log).
 
@@ -53,21 +53,23 @@ New session: read this file first, then README.md (method, tier table, strategy 
    - Run `strategies.py` for Shado (CE) and Dino (EV).
 
 ## Where things stand
-- **QF-B (Oct 17):** both favourites won (Grenadier, Ninken); our underdog bets lost, 1,000 points per account. Model called both.
-- **Semifinal bets (Oct 18, placed on v6):**
-  - Shado: 115 on Mirror Fruity Order (M1, ×40), 85 on Reserve Grenadier Squad (M2, ×50).
-  - Dino: 200 on Reserve Grenadier Squad.
-  - Crowd locked 58/42 (×40/×50) and 47/53 (×50/×40).
-  - v6 model: Fruity 0.91, Grenadier 0.80. Panel trust 0.61 / 0.56 → pooled 0.78 / 0.65.
-  - v7 re-run (after bets): Fruity 0.88, Grenadier 0.73.
-- **Panel trust standard:** ~0.6 when all units are seen; the 10-call log-loss optimum is 0.6–0.7.
-- **Next steps:**
-  1. Log the SF results (`data/matches.csv` → `make_results.py`).
-  2. Process the SF replay (extract, observe, dmg); write outcomes.
-  3. Refit v7. If an overtime game shows a second pulse, that pins `ot_period`.
-  4. Final: 2 matches (1st place and 3rd place), 200 per account, cap 300 per match.
-- **Open questions:** `ot_period` (only one pulse seen); target_mode is not yet decisive (0.61); Sappho's misses against airborne units are not modelled.
-- **Scoreboard** (10 modelled matches, before SF): model 8/10, Brier 0.238; crowd 6/10, Brier 0.278.
+- **Semifinal results (Oct 18):**
+  - M1: Saurians beat Fruity. v6 had Fruity at 0.91; Sappho won with ~11% HP left.
+  - M2: Grenadier beat Ninken in overtime.
+  - Points: Shado +5,400 (~19.1k total); Dino +10,000 (~42.5k total).
+  - Scoreboard (12 modelled matches): model 9/12, Brier 0.270; crowd 6/12, 0.283.
+- **Model v7 refit on 12 replays:** EPS 0.15, ESS 138. Overtime is a pulse of ~11% max HP every ~8.6 s. target_mode: lowest HP 0.61.
+- **Final (round ends ~22:00 ET Oct 19; support locks ~18:00 ET):**
+  - 3rd place: Fruity (L, crowd 14%, est. ×200) vs Ninken (R, 86%, est. ×25). Model P(Fruity) 0.925; units from prior 0.91.
+  - Championship: Saurians (L, 29%, est. ×70) vs Grenadier (R, 71%, est. ×35). Model P(Saurians) 0.859; units from prior 0.66.
+  - Panel trust (round 6): 0.50 / 0.51 → pooled P(Fruity) 0.53, P(Saurians) 0.58.
+  - **Provisional bets (200 per account):** Shado 50 Fruity + 150 Saurians; Dino 200 Fruity.
+- **To do at lock:**
+  1. Get screenshots of both Final boards. Placements in `data/placements.csv` (round `Final`) are the SF layouts mirrored and unconfirmed. Fix them, then re-run `python3 sim.py Final 4000`.
+  2. Read the real multipliers into `data/matches.csv` and re-run `strategies.py Final --pool 200 --lambda 2.1e-4 --linw 0.50,0.51`.
+  3. If Saurians' multiplier ends up close to Grenadier's, the Championship break-even nears 0.5: re-check that pick. Fruity holds even at ×105.
+- **After the Final:** log the results, process the replay, and write the summary (README results + what worked / didn't).
+- **Open:** account names (Shadow/Dino) are in the pushed repo, which conflicts with the earlier "no real account names" rule. Jaden hasn't decided between keeping them, renaming them going forward, or scrubbing the history.
 
 ## Working rules
 - Commit locally after each step. Push only when Jaden says to.
