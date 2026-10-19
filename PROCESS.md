@@ -830,3 +830,36 @@ Pool log loss is lowest at w = 1.0 (LOO 0.409, past-only 0.389; crowd-only 0.795
 - Dino: 200 Fruity (EV 26,561).
 
 At w = 0.5 the split is 49/151, so the picks are unchanged.
+
+**Update 2026-10-19 14:50 — real Final boards and multipliers (pre-lock), stress tests.**
+- 3rd-place board matches the mirrored SF layouts.
+- Championship board differs: Sappho at (2,3); Grenadier at cannoneer (1,4), pyroslinger (1,5), Wislawa (3,4), cannoneer (4,4), cryogunner (4,5).
+- Multipliers on screen: Fruity ×200 / Ninken ×25 (14/86); **Saurians ×105** / Grenadier ×30 (25/75).
+- v8 with the real boards: P(Fruity) 0.912, P(Saurians) 0.867.
+
+Jaden's case for Ninken: tanky (70k), strong AoE against Fruity's many small units, and the team's main unit. Stress tests (1,000 runs each):
+
+| 3rd place: change | P(Fruity) |
+|---|---|
+| Baseline | 0.914 |
+| Ninken dmg ×1.5 / ×2 | 0.829 / 0.676 |
+| Ninken + Kikouban dmg ×1.5 | 0.767 |
+| All AoE radius 1.5 cells (fit: 0.71) | 0.811 |
+| AoE radius 1.5 + Ninken ×1.5 | 0.619 |
+| Fruity dmg ×0.7 | 0.784 |
+| Targeting nearest / lowest HP | 0.954 / 0.890 |
+
+| Championship: change | P(Saurians) |
+|---|---|
+| Baseline | 0.893 |
+| Frost field radius 1.3 / every 30 s / first at 16 s | 0.887 / 0.880 / 0.855 |
+| Field small + rare + late | 0.849 |
+| Sappho dmg ×0.6 | 0.757 |
+| Worst case (both) | 0.658 |
+
+Break-evens at these multipliers: Fruity 0.073, Saurians 0.174. Every stress case pooled even at w = 0.4 stays far above both.
+
+**Bets at w = 0.65:**
+- Pooled: P(Fruity) 0.642 (EV/emblem 132 vs 15), P(Saurians) 0.651 (72 vs 17).
+- Shadow: 67 Fruity + 133 Saurians (EV 18,396, SD 8,575).
+- Dino: 200 Fruity (EV 26,388).
