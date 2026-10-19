@@ -2,4 +2,4 @@ unit_id,hit_ratio,n_hits,source
 sappho_amidst_the_waves,0.450,4,"R16-A: Sappho -> Electro shooter squad 8737 = 0.45 x 19400 (PROCESS 2026-10-15); 4805 Hydro (0.248) is a lighter volley"
 treasure_hoarder_scout,0.449,11,"R16-B: Scout 1033 = 0.449 x 2300 (11 hits)"
 large_cryo_slime,0.148,10,"R16-D/QF-B: 578 = 0.148 x 3900"
-swiftshadow_ninken,0.449,7,"QF-B M2: Ninken normal hit 4854 = 0.449 x 10800 (7 hits). No reads above ~8k: plunge at most ~1.6x a normal hit (one 7795/7995 Electro read, larger font, tau 5.7)"
+swiftshadow_ninken,0.449,7,"QF-B M2: Ninken normal hit 4854 = 0.449 x 10800 (7 hits). Plunge (gold ring, vt 69.9-70.3) lands as 4854 on several slimes = normal hit, AoE. The 795 Electro numbers are Superconduct/Electro-Charged on self-aura slimes (sim flat 800)"

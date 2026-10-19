@@ -20,10 +20,11 @@ BEATS = {("Ranged", "Flying"), ("Flying", "Melee"), ("Melee", "Ranged"),
          ("AoE", "Squad"), ("Squad", "Single-Target"), ("Single-Target", "AoE")}
 WRONG_PICK_POINTS = 10
 CLOCK = 45.0
-OVERTIME = 60.0   # after the clock, every unit loses a flat G['drain'] HP/s until one side is wiped
+OVERTIME = 60.0   # after the clock: overtime pulses (see run) until one side is wiped
+OT_DELAY = 1.5    # QF-A M1 and QF-B M1: the overtime hit lands ~1.5 s after the clock reads 00:00
 AURA_S = 6.0
 
-GLOBAL_KEYS = ("g", "k", "per_member", "freeze_s", "amp", "rain_on", "shatter", "cryo_slow", "aoe_r", "drain", "drain_pct", "drain_mode", "boss_freeze", "plunge_x")
+GLOBAL_KEYS = ("g", "k", "per_member", "freeze_s", "amp", "rain_on", "shatter", "cryo_slow", "aoe_r", "ot_pct", "ot_period", "boss_freeze", "plunge_x", "target_mode")
 SHRINK_N0 = 2.0   # per-unit posterior weight = n / (n + SHRINK_N0), n = replays the unit appeared in
 BATTLE_NOISE = 0.15   # per-battle lognormal damage noise per unit (crits, AI targeting luck)
 UNIT_KEYS = ("dmg", "iv")
@@ -56,10 +57,14 @@ def prior_global():
                 shatter=random.uniform(0.0, 1.0),    # bonus vs frozen targets
                 cryo_slow=(0.0 if random.random() < 0.5 else random.uniform(0.0, 0.5)),
                 aoe_r=random.uniform(0.4, 1.6),       # AoE radius in grid cells (learned from R16-A AoE-vs-squad fights)
-                drain=math.exp(random.uniform(math.log(1000), math.log(15000))),   # flat HP/s per unit in overtime
-                drain_pct=random.uniform(0.02, 0.15),     # or: fraction of max HP/s per unit in overtime
-                drain_mode=float(random.random() < 0.5),
-                plunge_x=random.uniform(1.5, 5.0),   # Ninken post-kill plunge: one AoE hit at this x a normal hit (card: "powerful")
+                # Overtime (2026-10-18, measured): QF-A M1 and QF-B M1 both show ONE step drop of the winner's
+                # team bar 1.5 s after 00:00 (Sappho 0.608 -> 0.507 = 10.1% max HP; Grenadier 0.526 -> 0.407 =
+                # 11.9%), then flat for 2.5 s; the loser's sliver dies to it. Continuous drain is ruled out.
+                ot_pct=random.uniform(0.09, 0.13),        # fraction of max HP every unit loses per overtime pulse
+                ot_period=random.uniform(3.0, 10.0),      # seconds between pulses (only the first has been seen)
+                target_mode=float(random.choice((0, 1, 2))),  # 0 nearest foe, 1 lowest current HP, 2 sticky random
+                plunge_x=random.uniform(0.9, 1.3),   # Ninken post-kill plunge: QF-B frames 69.9-70.3 show it lands as 4854 on
+                                                     # several slimes = exactly the normal hit (0.449 ATK), AoE; so ~1x
                 boss_freeze=float(random.random() < 0.25))  # can Boss-tagged units be frozen? R16-A frame sweep: Sappho had
                                                              # 2 Hydro+Cryo chances, 0 freezes (Lawachurl froze 4x in the same
                                                              # fight). Weak evidence -> P(freezable) = 0.25, not 0  # 1 = flat, 0 = percentage (replay can't yet tell them apart)  # overtime: flat HP/s lost by EVERY unit after the clock (user hypothesis)  # attack-interval increase while Cryo-afflicted (hypothesis)
@@ -246,6 +251,7 @@ def run(units, plist, G, U, dt=0.1, trace=None):
     tot = {s: sum(e["max"] for e in ents if e["side"] == s) for s in "LR"}
     t = 0.0
     next_tr = 0.0
+    next_pulse = 0.0
     while t < CLOCK + OVERTIME:
         if trace is not None and t >= next_tr - 1e-9:
             trace.append((round(t, 1),
@@ -273,7 +279,15 @@ def run(units, plist, G, U, dt=0.1, trace=None):
             foes = [e for e in ents if e["side"] != a["side"] and e["hp"] > 0 and can_target(a, e)]
             if not foes:
                 a["next"] = t + a["iv"]; continue
-            tgt = min(foes, key=lambda e: math.hypot(e["r"] - a["r"], e["c"] - a["c"]))
+            tm = int(G.get("target_mode", 0))
+            if tm == 1:      # focus the weakest foe
+                tgt = min(foes, key=lambda e: e["hp"])
+            elif tm == 2:    # pick a random foe and stay on it until it dies
+                if a.get("tgt") is None or a["tgt"]["hp"] <= 0 or a["tgt"] not in foes:
+                    a["tgt"] = random.choice(foes)
+                tgt = a["tgt"]
+            else:
+                tgt = min(foes, key=lambda e: math.hypot(e["r"] - a["r"], e["c"] - a["c"]))
             d = math.hypot(tgt["r"] - a["r"], tgt["c"] - a["c"])
             if a["u"]["range_type"] == "Melee" and d > 1.2:
                 step = 0.5
@@ -349,10 +363,11 @@ def run(units, plist, G, U, dt=0.1, trace=None):
                             if e["u"]["death_aoe"] not in o["u"].get("immune", "").split("|"):
                                 react(e["u"]["death_aoe"], o, t, G)
                                 o["hp"] -= e["atk"]
-        if t >= CLOCK:
+        if t >= CLOCK + OT_DELAY and t >= next_pulse:
             for e in ents:
                 if e["hp"] > 0:
-                    e["hp"] -= (G["drain"] if G.get("drain_mode", 1) else G["drain_pct"] * e["max"]) * dt
+                    e["hp"] -= G.get("ot_pct", 0.11) * e["max"]
+            next_pulse = t + G.get("ot_period", 5.0)
         L = sum(e["hp"] > 0 for e in ents if e["side"] == "L")
         R = sum(e["hp"] > 0 for e in ents if e["side"] == "R")
         if not L or not R:

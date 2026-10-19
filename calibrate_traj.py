@@ -181,5 +181,6 @@ if __name__ == "__main__":
     for k in sim.GLOBAL_KEYS:
         lo, md, hi = q([r[k] for r in kept])
         print(f"  {k:18s} {lo:9.3f} / {md:9.3f} / {hi:9.3f}")
-    pflat = sum(r["weight"] for r in kept if r["drain_mode"] == 1) / sum(r["weight"] for r in kept)
-    print(f"\nP(flat overtime drain) = {pflat:.2f}")
+    W = sum(r["weight"] for r in kept)
+    for m, name in ((0, "nearest"), (1, "lowest HP"), (2, "sticky random")):
+        print(f"P(target_mode = {name}) = {sum(r['weight'] for r in kept if int(r['target_mode']) == m) / W:.2f}")
