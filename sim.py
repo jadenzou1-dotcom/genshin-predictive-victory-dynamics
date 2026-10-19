@@ -24,7 +24,8 @@ OVERTIME = 60.0   # after the clock: overtime pulses (see run) until one side is
 OT_DELAY = 1.5    # QF-A M1 and QF-B M1: the overtime hit lands ~1.5 s after the clock reads 00:00
 AURA_S = 6.0
 
-GLOBAL_KEYS = ("g", "k", "per_member", "freeze_s", "amp", "rain_on", "shatter", "cryo_slow", "aoe_r", "ot_pct", "ot_period", "boss_freeze", "plunge_x", "target_mode")
+GLOBAL_KEYS = ("g", "k", "per_member", "freeze_s", "amp", "rain_on", "shatter", "cryo_slow", "aoe_r", "ot_pct", "ot_period", "boss_freeze", "plunge_x", "target_mode",
+               "mist_t0", "mist_iv", "mist_r", "mist_dur", "mist_tick")
 SHRINK_N0 = 2.0   # per-unit posterior weight = n / (n + SHRINK_N0), n = replays the unit appeared in
 BATTLE_NOISE = 0.15   # per-battle lognormal damage noise per unit (crits, AI targeting luck)
 UNIT_KEYS = ("dmg", "iv")
@@ -63,6 +64,14 @@ def prior_global():
                 ot_pct=random.uniform(0.09, 0.13),        # fraction of max HP every unit loses per overtime pulse
                 ot_period=random.uniform(4.5, 12.0),      # seconds between pulses: SF M2 shows no 2nd pulse within 4.4 s of the first
                 target_mode=float(random.choice((0, 1, 2))),  # 0 nearest foe, 1 lowest current HP, 2 sticky random
+                # Sappho frost field (SF M1 frames 00:35-00:32): a large field on the enemy cluster; opening hit
+                # 5461 = 0.281 ATK (Hydro) on everyone inside, then repeated 1092 = 0.0563 ATK Cryo ticks.
+                # Damage per hit is measured; timing, radius and duration are fitted.
+                mist_t0=random.uniform(4.0, 16.0),    # first cast (s)
+                mist_iv=random.uniform(12.0, 30.0),   # recast period (s)
+                mist_r=random.uniform(1.2, 3.0),      # radius in grid cells
+                mist_dur=random.uniform(2.0, 5.0),    # field lifetime (s)
+                mist_tick=random.uniform(0.3, 1.0),   # seconds between Cryo ticks
                 plunge_x=random.uniform(0.9, 1.3),   # Ninken post-kill plunge: QF-B frames 69.9-70.3 show it lands as 4854 on
                                                      # several slimes = exactly the normal hit (0.449 ATK), AoE; so ~1x
                 boss_freeze=float(random.random() < 0.25))  # can Boss-tagged units be frozen? R16-A frame sweep: Sappho had
@@ -252,7 +261,34 @@ def run(units, plist, G, U, dt=0.1, trace=None):
     t = 0.0
     next_tr = 0.0
     next_pulse = 0.0
+    fields = []
+    for e in ents:
+        if e["u"].get("frost_field") == "yes":
+            e["next_mist"] = G.get("mist_t0", 10.0)
     while t < CLOCK + OVERTIME:
+        for e in ents:   # Sappho frost field: cast on the densest enemy cluster
+            if e.get("next_mist") is not None and e["hp"] > 0 and t >= e["next_mist"] and t >= e["stun"]:
+                foes = [o for o in ents if o["side"] != e["side"] and o["hp"] > 0]
+                e["next_mist"] = t + G.get("mist_iv", 20.0)
+                if foes:
+                    R = G.get("mist_r", 2.0)
+                    c = max(foes, key=lambda o: sum(math.hypot(p["r"] - o["r"], p["c"] - o["c"]) <= R for p in foes))
+                    base = float(e["u"]["atk"])
+                    for o in foes:
+                        if math.hypot(o["r"] - c["r"], o["c"] - c["c"]) <= R:
+                            react("Hydro", o, t, G); o["hp"] -= 0.281 * base
+                    fields.append(dict(r=c["r"], c=c["c"], R=R, side=e["side"], until=t + G.get("mist_dur", 3.5),
+                                       nxt=t + G.get("mist_tick", 0.5), tick=G.get("mist_tick", 0.5), atk=base))
+        for f in fields:
+            if t >= f["nxt"] and t <= f["until"]:
+                f["nxt"] = t + f["tick"]
+                for o in ents:
+                    if o["side"] != f["side"] and o["hp"] > 0 and math.hypot(o["r"] - f["r"], o["c"] - f["c"]) <= f["R"]:
+                        mult, _ = react("Cryo", o, t, G)
+                        dmg = 0.0563 * f["atk"] * mult
+                        if o["frozen_until"] > t: dmg *= 1 + G["shatter"]
+                        o["hp"] -= dmg
+        fields = [f for f in fields if f["until"] >= t]
         if trace is not None and t >= next_tr - 1e-9:
             trace.append((round(t, 1),
                           sum(max(e["hp"], 0) for e in ents if e["side"] == "L") / tot["L"],
