@@ -61,7 +61,7 @@ def prior_global():
                 # team bar 1.5 s after 00:00 (Sappho 0.608 -> 0.507 = 10.1% max HP; Grenadier 0.526 -> 0.407 =
                 # 11.9%), then flat for 2.5 s; the loser's sliver dies to it. Continuous drain is ruled out.
                 ot_pct=random.uniform(0.09, 0.13),        # fraction of max HP every unit loses per overtime pulse
-                ot_period=random.uniform(3.0, 10.0),      # seconds between pulses (only the first has been seen)
+                ot_period=random.uniform(4.5, 12.0),      # seconds between pulses: SF M2 shows no 2nd pulse within 4.4 s of the first
                 target_mode=float(random.choice((0, 1, 2))),  # 0 nearest foe, 1 lowest current HP, 2 sticky random
                 plunge_x=random.uniform(0.9, 1.3),   # Ninken post-kill plunge: QF-B frames 69.9-70.3 show it lands as 4854 on
                                                      # several slimes = exactly the normal hit (0.449 ATK), AoE; so ~1x

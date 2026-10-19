@@ -1,0 +1,3 @@
+round,match,winner_side,winner_hp_frac,loser_wiped_at_s,source
+SF,1,R,0.11,42,"replay.extract of Genshin_Impact_2026-10-18_22-20-07.mp4; Fruity wiped ~tau 42 (before 00:00), Sappho ~11% HP. Commentary: Sappho's ice mist 'especially deadly against fragile ranged units'; dashes to keep enemies chasing; Treasure Hoarder ranged squad concentrates fire; Pyro Potioneer burning area"
+SF,2,L,0.14,47.8,"same video; Ninken alone from tau ~18, went to overtime ('Vicious Battle... both sides continuously lose HP'). Overtime hit ~1.3 s after 00:00: Grenadier bar 0.183 -> 0.142, Ninken 0.060 -> 0.015; Grenadier then flat 4.4 s to the end (no second pulse within 4.4 s); Ninken died at tau ~47.8"
