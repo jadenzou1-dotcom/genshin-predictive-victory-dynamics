@@ -62,17 +62,12 @@ New session: read this file first, then README.md (method, tier table, strategy 
 - **Final (round ends ~22:00 ET Oct 19; support locks ~18:00 ET):**
   - 3rd place: Fruity (L, crowd 14%, est. ×200) vs Ninken (R, 86%, est. ×25). Model P(Fruity) 0.925; units from prior 0.91.
   - Championship: Saurians (L, 29%, est. ×70) vs Grenadier (R, 71%, est. ×35). Model P(Saurians) 0.859; units from prior 0.66.
-  - Panel trust (round 6): 0.50 / 0.51 → pooled P(Fruity) 0.53, P(Saurians) 0.58.
-  - **Provisional bets (200 per account):** Shado 50 Fruity + 150 Saurians; Dino 200 Fruity.
-- **Before the lock (any time today):**
-  1. **Board screenshots now.** The boards are already visible, so placements can be confirmed before the lock.
-  2. **SF damage numbers:** `python -m replay.dmg <SF video> SF data/replays/extracted` was not run (~20 min). It would pin Sappho's hit size and her ice-mist damage on Fruity, and Grenadier's hits on Ninken.
-  3. **Model Sappho's ice mist / frost field.** The sim treats her as 3-target splash. The SF commentary and the R16-A frame study both show a lingering frost field that is "especially deadly against fragile ranged units". This is the most likely cause of the SF M1 miss, and the Championship depends on Sappho.
-  4. **Honest backtest of v7:** `python3 loo.py` (leave-one-out and past-only) on 12 replays, including the SF M1 miss. Use it to re-set the trust weight instead of panel judgement alone.
-  5. Lower priority: `ot_period` (only one pulse ever seen); target_mode is not decisive (lowest HP 0.61).
+  - v8 (frost field) model: Fruity 0.919, Saurians 0.882. Trust w = 0.65 (backtest optimum 1.0, discounted for leakage; panel said 0.50) → pooled 0.65 / 0.68.
+  - **Provisional bets (200 per account):** Shado ~60 Fruity + ~140 Saurians; Dino 200 Fruity.
+- **Done before the lock (Oct 19):** v8 Sappho frost field + refit (ESS 188); v8 leave-one-out backtest (past-only 11/12, Brier 0.122). Still needed from Jaden: Final board screenshots.
 - **To do at lock:**
   1. Get screenshots of both Final boards. Placements in `data/placements.csv` (round `Final`) are the SF layouts mirrored and unconfirmed. Fix them, then re-run `python3 sim.py Final 4000`.
-  2. Read the real multipliers into `data/matches.csv` and re-run `strategies.py Final --pool 200 --lambda 2.1e-4 --linw 0.50,0.51`.
+  2. Read the real multipliers into `data/matches.csv` and re-run `strategies.py Final --pool 200 --lambda 2.1e-4 --linw 0.65,0.65`.
   3. If Saurians' multiplier ends up close to Grenadier's, the Championship break-even nears 0.5: re-check that pick. Fruity holds even at ×105.
 - **After the Final:** log the results, process the replay, and write the summary (README results + what worked / didn't).
 - **Open:** account names (Shadow/Dino) are in the pushed repo, which conflicts with the earlier "no real account names" rule. Jaden hasn't decided between keeping them, renaming them going forward, or scrubbing the history.

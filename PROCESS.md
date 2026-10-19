@@ -786,3 +786,47 @@ Trust is cut from 0.6 because of the SF M1 miss. M2's model figure leans on a Sa
 - Dino: 200 Fruity (EV 22,235, SD 18,960).
 
 **Re-check at lock:** read the real multipliers and board positions. A Saurians multiplier near Grenadier's would raise its break-even toward 0.5.
+
+---
+
+## 2026-10-19 afternoon — v8: Sappho frost field, honest backtest, Final update (pre-lock)
+
+**Frost field (the SF M1 miss).** SF M1 frames 00:35–00:32 show Sappho dropping a large field on Fruity's cluster:
+- Opening hit: 5,461 = 0.281 × ATK, Hydro, on every unit inside.
+- Then repeated 1,092 = 0.0563 × ATK Cryo ticks. Hydro then Cryo freezes.
+- About 12k per unit per field: that nearly one-shots 13k Scouts. This matches the commentary that the "ice mist [is] especially deadly against fragile ranged units".
+
+The sim had her as 3-target splash. v8 adds the field (`frost_field` column) with the measured damage. First cast, period, radius, lifetime and tick spacing are fitted:
+- mist_t0 11.6 s (frames: ~10 s)
+- mist_iv 21 s
+- mist_r 2.1 cells
+- mist_dur 3.4 s
+- tick 0.67 s
+
+**Refit (12 replays):** EPS 0.15 at ESS 188 (v7: 138), the best fit so far. target_mode: lowest HP 0.49, nearest 0.34, random 0.17. In-sample SF M1 is now P(Fruity) 0.33, so Sappho wins as she did.
+
+`replay.dmg` on the SF video hit the 30-minute background limit and was not rerun; the field damage was read off the frames instead.
+
+**Honest backtest (`loo.py 600`, v8, 12 replays; `data/backtest_v8_loo.txt`):**
+
+| Predictor | Correct | Brier |
+|---|---|---|
+| v8 leave-one-out | 9/12 | 0.131 |
+| v8 past-only (only earlier rounds) | 11/12 | 0.122 |
+| Crowd | 6/12 | 0.283 |
+| Model at the time (v1–v6) | 9/12 | 0.270 |
+
+Pool log loss is lowest at w = 1.0 (LOO 0.409, past-only 0.389; crowd-only 0.795). Caveat: v8's mechanics (frost field, overtime pulse, per_member, targeting) were found by studying these same replays, so the backtest has structural leakage and is optimistic. Trust is set to **w = 0.65**, between the panel's 0.50 and the backtest's 1.0.
+
+**Final (v8; multipliers estimated, not locked):**
+
+| Match | Model | Crowd | Pooled (w = 0.65) |
+|---|---|---|---|
+| 3rd place: Fruity vs Ninken | 0.919 | 0.14 | 0.646 |
+| Championship: Saurians vs Grenadier | 0.882 | 0.29 | 0.675 |
+
+**Provisional bets:**
+- Shadow: 61 Fruity + 139 Saurians (EV 15,119, SD 6,780).
+- Dino: 200 Fruity (EV 26,561).
+
+At w = 0.5 the split is 49/151, so the picks are unchanged.
