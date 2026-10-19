@@ -744,3 +744,45 @@ The loser in both games had a sliver left and died to the hit. The continuous dr
 **Fit quality:** EPS 0.12 at **ESS 106** (v6: EPS 0.12 at ESS 72; v5: EPS 0.15 at ESS 124), so v7 fits the 10 replays best.
 
 **SF re-run (v7, for the record; bets already placed on v6):** P(Fruity) 0.880, P(Grenadier) 0.733. Pooled at the round-5 panel weights (0.61/0.56): 0.763 / 0.617. Both picks unchanged. v7 would split Shadow 124 Fruity / 76 Grenadier (entered: 115/85, EV gap ≈ 20 points); Dino unchanged at 200 Grenadier.
+
+---
+
+## 2026-10-18 22:30 — Semifinal results, SF replay, Final predictions (pre-lock)
+
+**SF results:**
+- M1: **Saurians beat Fruity.** v6 had Fruity at 0.91; crowd 58%. Sappho won narrowly: Fruity was wiped at τ ≈ 42 with Sappho at ~11% HP. Commentary: "Sappho's ice mist is especially deadly against fragile ranged units"; dashes keep enemies chasing.
+- M2: **Grenadier beat Ninken** (v6 0.80; crowd 47%) in overtime, with 14% HP. Ninken fought alone from τ ≈ 18.
+- Points: Shadow 115 × 10 + 85 × 50 = 5,400 (~19.1k total); Dino 200 × 50 = 10,000 (~42.5k).
+- Scoreboard (12 modelled matches): model 9/12, Brier 0.270; crowd 6/12, 0.283.
+
+**Overtime, third observation (SF M2).** The game text says "both sides continuously lose HP". The bars show one step ~1.3 s after 00:00 (Grenadier 0.183 → 0.142, Ninken 0.060 → 0.015), then Grenadier flat for 4.4 s to the end. So overtime is a pulse with period > 4.4 s; the `ot_period` prior is now 4.5–12 s. Refit gives ot_period 8.6 s (10–90%: 5.4–11.2) and ot_pct 0.109.
+
+**Refit on 12 replays:** EPS 0.15 at ESS 138. EPS went back up from 0.12 because SF M1 is hard to fit. In-sample, SF M1 is now P(Fruity) 0.50 (was 0.91), so Sappho's fitted strength moved a lot on one narrow win. target_mode: lowest HP 0.61, nearest 0.22, random 0.17.
+
+**Final (support not locked; multipliers estimated from the tier table; placements = SF layouts mirrored, unconfirmed):**
+
+| Match | Model | Sensitivity | Units from prior | Crowd | Est. mult | Break-even |
+|---|---|---|---|---|---|---|
+| 3rd place: Fruity vs Ninken | 0.925 | 0.90–0.94 | 0.91 | 14% | ×200 / ×25 | 0.073 (0.136 at ×105) |
+| Championship: Saurians vs Grenadier | 0.859 | 0.83–0.88 | 0.66 | 29% | ×70 / ×35 | 0.294 |
+
+**Panel (round 6):**
+
+| Agent | w M1 | w M2 |
+|---|---|---|
+| A1 | 0.55 | 0.45 |
+| A2 | 0.45 | 0.55 |
+| A3 | 0.45 | 0.55 |
+| A4 | 0.50 | 0.50 |
+| A5 | 0.55 | 0.50 |
+| **Average** | **0.50** | **0.51** |
+
+Trust is cut from 0.6 because of the SF M1 miss. M2's model figure leans on a Sappho refit driven by one narrow win (units-from-prior 0.66).
+
+**Pooled:** P(Fruity) 0.532 (EV 111 vs 17), P(Saurians) 0.580 (EV 45 vs 20.5). Both picks hold for any w > ~0.1 at the estimated multipliers; even the crowd alone is at or above both break-evens.
+
+**Provisional allocation (200 per account):**
+- Shadow: 50 Fruity + 150 Saurians (EV 12,280, SD 6,496).
+- Dino: 200 Fruity (EV 22,235, SD 18,960).
+
+**Re-check at lock:** read the real multipliers and board positions. A Saurians multiplier near Grenadier's would raise its break-even toward 0.5.

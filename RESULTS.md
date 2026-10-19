@@ -323,3 +323,44 @@ The model never sees support rates; "Crowd" is the support rate read as a win pr
 | 2 | 2026-10-18 19:26 | yes | 47% | 53% | ×50 | ×40 | locked (2h33m left) |
 
 </details>
+
+## Final
+
+### Match 1: Mirror Fruity Order vs What Does the Ninken Say?
+
+| | Left | Right |
+|---|---|---|
+| Team | Mirror Fruity Order | What Does the Ninken Say? |
+| Crowd support | 14% | 86% |
+| Multiplier | ×200 | ×25 |
+| Model win chance | 92.5% | 7.5% |
+
+- **Winner:** pending
+- **Model's call:** Mirror Fruity Order (92.5%)
+- **Crowd's call:** What Does the Ninken Say? (86%)
+- **Picks:** PROVISIONAL Shadow: 50 Fruity; Dino: 200 Fruity
+- **Notes:** 3rd-place playoff; PRE-LOCK support; multipliers ESTIMATED from tier table, not read on screen; placements = SF layouts mirrored (unconfirmed); v7 (12 replays) sensitivity 0.90-0.94, units-from-prior 0.91; panel w 0.50 -> 0.532
+
+### Match 2: Saurians Are the Cutest vs Reserve Grenadier Squad
+
+| | Left | Right |
+|---|---|---|
+| Team | Saurians Are the Cutest | Reserve Grenadier Squad |
+| Crowd support | 29% | 71% |
+| Multiplier | ×70 | ×35 |
+| Model win chance | 85.9% | 14.1% |
+
+- **Winner:** pending
+- **Model's call:** Saurians Are the Cutest (85.9%)
+- **Crowd's call:** Reserve Grenadier Squad (71%)
+- **Picks:** PROVISIONAL Shadow: 150 Saurians; Dino: 0
+- **Notes:** Championship; PRE-LOCK support; multipliers ESTIMATED from tier table, not read on screen; placements = SF layouts mirrored (unconfirmed); v7 sensitivity 0.83-0.88, units-from-prior 0.66; panel w 0.51 -> 0.580
+
+<details><summary>Crowd snapshots this round</summary>
+
+| Match | Time (ET) | Locked | Left support | Right support | Left mult | Right mult | Notes |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-18 22:24 | no | 14% | 86% | — | — | 3rd-place playoff pre-lock (multipliers not shown) |
+| 2 | 2026-10-18 22:24 | no | 29% | 71% | — | — | Championship pre-lock (multipliers not shown) |
+
+</details>
