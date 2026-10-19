@@ -64,6 +64,12 @@ New session: read this file first, then README.md (method, tier table, strategy 
   - Championship: Saurians (L, 29%, est. ×70) vs Grenadier (R, 71%, est. ×35). Model P(Saurians) 0.859; units from prior 0.66.
   - Panel trust (round 6): 0.50 / 0.51 → pooled P(Fruity) 0.53, P(Saurians) 0.58.
   - **Provisional bets (200 per account):** Shado 50 Fruity + 150 Saurians; Dino 200 Fruity.
+- **Before the lock (any time today):**
+  1. **Board screenshots now.** The boards are already visible, so placements can be confirmed before the lock.
+  2. **SF damage numbers:** `python -m replay.dmg <SF video> SF data/replays/extracted` was not run (~20 min). It would pin Sappho's hit size and her ice-mist damage on Fruity, and Grenadier's hits on Ninken.
+  3. **Model Sappho's ice mist / frost field.** The sim treats her as 3-target splash. The SF commentary and the R16-A frame study both show a lingering frost field that is "especially deadly against fragile ranged units". This is the most likely cause of the SF M1 miss, and the Championship depends on Sappho.
+  4. **Honest backtest of v7:** `python3 loo.py` (leave-one-out and past-only) on 12 replays, including the SF M1 miss. Use it to re-set the trust weight instead of panel judgement alone.
+  5. Lower priority: `ot_period` (only one pulse ever seen); target_mode is not decisive (lowest HP 0.61).
 - **To do at lock:**
   1. Get screenshots of both Final boards. Placements in `data/placements.csv` (round `Final`) are the SF layouts mirrored and unconfirmed. Fix them, then re-run `python3 sim.py Final 4000`.
   2. Read the real multipliers into `data/matches.csv` and re-run `strategies.py Final --pool 200 --lambda 2.1e-4 --linw 0.50,0.51`.
