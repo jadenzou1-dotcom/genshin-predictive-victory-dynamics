@@ -23,7 +23,7 @@ CLOCK = 45.0
 OVERTIME = 60.0   # after the clock, every unit loses a flat G['drain'] HP/s until one side is wiped
 AURA_S = 6.0
 
-GLOBAL_KEYS = ("g", "k", "per_member", "freeze_s", "amp", "rain_on", "shatter", "cryo_slow", "aoe_r", "drain", "drain_pct", "drain_mode", "boss_freeze")
+GLOBAL_KEYS = ("g", "k", "per_member", "freeze_s", "amp", "rain_on", "shatter", "cryo_slow", "aoe_r", "drain", "drain_pct", "drain_mode", "boss_freeze", "plunge_x")
 SHRINK_N0 = 2.0   # per-unit posterior weight = n / (n + SHRINK_N0), n = replays the unit appeared in
 BATTLE_NOISE = 0.15   # per-battle lognormal damage noise per unit (crits, AI targeting luck)
 UNIT_KEYS = ("dmg", "iv")
@@ -47,7 +47,9 @@ def prior_global():
                                                      # show 1.0x on advantaged and disadvantaged matchups alike (two
                                                      # independent frame checks, R16-A/B/C), so near 1; small slack
                                                      # left in case counters act through something not yet seen
-                per_member=float(random.random() < 0.5),
+                per_member=1.0,                      # FIXED 2026-10-18: damage-number totals vs HP-bar loss in R16-B (Fruity)
+                                                     # and R16-C (Chubby) fit full card HP per squad member (0.43/0.36 vs
+                                                     # 0.35-0.43 capture on single-unit teams); shared HP gives 0.82/0.95
                 freeze_s=random.uniform(0.5, 6.0),   # stun per Freeze (R16-A: Sappho kept the Lawachurl frozen 10 s straight)
                 amp=random.uniform(1.2, 2.0),        # vaporize/melt multiplier
                 rain_on=float(random.random() < 0.5),  # Hydro rain wets own team
@@ -57,14 +59,30 @@ def prior_global():
                 drain=math.exp(random.uniform(math.log(1000), math.log(15000))),   # flat HP/s per unit in overtime
                 drain_pct=random.uniform(0.02, 0.15),     # or: fraction of max HP/s per unit in overtime
                 drain_mode=float(random.random() < 0.5),
+                plunge_x=random.uniform(1.5, 5.0),   # Ninken post-kill plunge: one AoE hit at this x a normal hit (card: "powerful")
                 boss_freeze=float(random.random() < 0.25))  # can Boss-tagged units be frozen? R16-A frame sweep: Sappho had
                                                              # 2 Hydro+Cryo chances, 0 freezes (Lawachurl froze 4x in the same
                                                              # fight). Weak evidence -> P(freezable) = 0.25, not 0  # 1 = flat, 0 = percentage (replay can't yet tell them apart)  # overtime: flat HP/s lost by EVERY unit after the clock (user hypothesis)  # attack-interval increase while Cryo-afflicted (hypothesis)
 
-def prior_unit():
+_MEAS = None
+
+
+def measured_hits():
+    """Per-hit damage measured from replay damage numbers: unit_id -> damage / card ATK."""
+    global _MEAS
+    if _MEAS is None:
+        p = DATA / "unit_hits_measured.csv"
+        _MEAS = {r["unit_id"]: float(r["hit_ratio"]) for r in csv.DictReader(open(p))} if p.exists() else {}
+    return _MEAS
+
+
+def prior_unit(uid=None):
     # a 100% hit is HIT_G x ATK; skill multipliers seen in replays run 50%-200%, so the average
     # multiplier per attack is centred at 1.0 with that spread. Attack interval carries speed
     # and is learned from the HP curves.
+    m = measured_hits().get(uid)
+    if m:   # damage per hit read off the replay: centre dmg there, keep 20% slack (hit mix, crits)
+        return dict(dmg=random.lognormvariate(math.log(m / HIT_G), 0.2), iv=random.uniform(1.0, 6.0))
     return dict(dmg=random.lognormvariate(0.0, 0.45), iv=random.uniform(1.0, 6.0))
 
 
@@ -93,13 +111,14 @@ def draw_params(unit_ids, posterior, counts=None):
     a unit seen in n replays uses its posterior value with probability n/(n+SHRINK_N0)
     and a fresh prior draw otherwise, so one battle can't make a unit look certain."""
     if not posterior:
-        return prior_global(), {u: prior_unit() for u in unit_ids}
+        return prior_global(), {u: prior_unit(u) for u in unit_ids}
     counts = counts or {}
     row = random.choices(posterior, weights=[float(r.get("weight", 1)) for r in posterior])[0]
     glob = {k: float(row[k]) for k in GLOBAL_KEYS if k in row}
     for k, v in prior_global().items():
         glob.setdefault(k, v)
     glob["g"] = HIT_G   # measured; never taken from an older posterior row
+    glob["per_member"] = 1.0   # measured (see prior_global); older rows with 0 are overridden
     # boss_freeze is kept from the row: rows are fit under the 0.25 prior, so the row's own value
     # stays consistent with the Sappho parameters fitted alongside it (panel agent 3)
     # Shrinkage is drawn once per SOURCE REPLAY GROUP, not per unit: units fitted jointly in the
@@ -115,7 +134,7 @@ def draw_params(unit_ids, posterior, counts=None):
         if f"{u}.dmg" in row and n and use[key]:
             units[u] = {k: float(row[f"{u}.{k}"]) for k in UNIT_KEYS}
         else:
-            units[u] = prior_unit()
+            units[u] = prior_unit(u)
     return glob, units
 
 
@@ -168,6 +187,8 @@ def can_target(a, t):
 def react(hit_el, tgt, t, G):
     """Apply an element to a target. Returns (damage multiplier, swirl?)."""
     aura = tgt["aura"] if tgt["aura_until"] > t else None
+    if aura is None and tgt["u"].get("self_aura") == "yes":   # slimes carry their own element permanently
+        aura = tgt["els"][0]
     if hit_el in ("Physical", None) or aura is None or aura == hit_el:
         if hit_el not in ("Physical", None, "Anemo"):
             tgt["aura"], tgt["aura_until"] = hit_el, t + AURA_S
@@ -212,7 +233,8 @@ def build(units, plist, G, U):
                              next=(0.0 if (u.get("opening_burst") or u.get("opening_aoe")) else random.uniform(0, up["iv"])), stun=0.0, els=els, el_i=0,
                              aura=None, aura_until=0.0, frozen_until=0.0, burns=[], dead=False,
                              burst=int(u.get("opening_burst") or 0), buff_next=random.uniform(3, 8), buff_iv=random.uniform(3, 8), stacks=0,
-                             ward=ward, rx=0, shell_at=random.randint(3, 10), opening_aoe=u.get("opening_aoe") == "yes"))
+                             ward=ward, rx=0, shell_at=random.randint(3, 10), opening_aoe=u.get("opening_aoe") == "yes", plunge=False,
+                             plunge_x=(G.get("plunge_x", 3.0) if u.get("kill_plunge") == "yes" else 0.0)))
     return ents
 
 
@@ -269,6 +291,9 @@ def run(units, plist, G, U, dt=0.1, trace=None):
             hits = [(e, 1.0) for e in near] if splash else [(tgt, 1.0)]
             if "Splash AoE" in a["u"].get("special_tags", ""):   # panel agent 2: replay shows her volleys
                 hits = [(e, 1.0) for e in sorted(foes, key=lambda e: math.hypot(e["r"] - tgt["r"], e["c"] - tgt["c"]))[:3]]
+            if a["plunge"]:   # Ninken: after a kill, next attack is one AoE plunge at plunge_x times a normal hit
+                a["plunge"] = False
+                hits = [(e, a["plunge_x"]) for e in near]
             if a["opening_aoe"]:   # entry move: one AoE hit at ~2x damage (assumption)
                 a["opening_aoe"] = False
                 hits = [(e, 2.0) for e in near]
@@ -284,7 +309,10 @@ def run(units, plist, G, U, dt=0.1, trace=None):
                 if h["frozen_until"] > t: dmg *= 1 + G["shatter"]
                 if h["ward"] > 0:   # Geo Ward absorbs damage first
                     absorbed = min(h["ward"], dmg); h["ward"] -= absorbed; dmg -= absorbed
+                was_alive = h["hp"] > 0
                 h["hp"] -= dmg
+                if was_alive and h["hp"] <= 0 and a["plunge_x"] > 0:
+                    a["plunge"] = True
                 if h["u"].get("shell") and h["rx"] >= h["shell_at"]:   # Fontemer shell breaks after enough reactions
                     sh = h["u"]["shell"]; h["u"]["shell"] = ""
                     if h["u"]["unit_id"] == "sternshield_crab":

@@ -105,7 +105,7 @@ def one(seed):
         mids = sorted({p["unit_id"] for p in pl})
         dl, Ul = [], []
         for _ in range(M):
-            U = {u: sim.prior_unit() for u in mids}
+            U = {u: sim.prior_unit(u) for u in mids}
             tr = []
             dl.append(distance(o, sim.run(units, pl, G, U, trace=tr), tr)); Ul.append(U)
         ds.append((dl, Ul, mids))
