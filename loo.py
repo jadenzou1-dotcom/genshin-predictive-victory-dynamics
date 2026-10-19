@@ -78,7 +78,7 @@ def loo(m_key, mode="loo", target=None):
                 src = random.choice(others)
                 U[u] = {k: float(row[f"{src}|{u}.{k}"]) for k in sim.UNIT_KEYS}
             else:
-                U[u] = sim.prior_unit()
+                U[u] = sim.prior_unit(u)
         left += sim.run(units, pl, G, U)[0] == "L"
     return left / N, ess
 
