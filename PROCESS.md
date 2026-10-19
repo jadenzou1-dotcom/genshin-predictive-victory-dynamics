@@ -682,3 +682,47 @@ Why below the 0.6 standard: M1 hinges on per_member (0.72 off / 0.89 on, posteri
 **Final (pooled at 0.53 / 0.52):** P(Fruity) 0.722 (EV 31.7 vs 21.1), P(Grenadier) 0.672 (EV 36.9 vs 19.8). Even worst-case plunge-adjusted model numbers pool above both break-evens.
 - **Shadow:** 86 Fruity + 114 Grenadier (EV 6,928, SD 2,433).
 - **Dino:** 200 Grenadier (EV 7,378, SD 3,755).
+
+---
+
+## 2026-10-18 20:40 — Model v6: panel fixes implemented, re-panel, final SF bets
+
+Jaden: "Just fix them", then re-ask the panel for trust weights.
+
+**1. per_member settled from data (no longer a free parameter).** For each replay team: (sum of on-screen damage numbers landing on it) ÷ (HP-bar fraction lost × card total HP). Teams of single units have a known total, so they measure the OCR capture rate: 0.23–0.43 in R16-B/R16-C. Squad teams under each rule:
+
+| Squad team | Full card HP per member | HP shared across squad |
+|---|---|---|
+| Fruity (R16-B) | **0.43** | 0.82 |
+| Chubby (R16-C) | **0.36** | 0.95 |
+
+Only "full HP per member" lands in the capture range, so `per_member = 1` is now fixed in `sim.py`. R16-A's damage totals are inconsistent even on single-unit teams (capture 0.90–1.94), so it was left out of this test. The trajectory ABC could not see damage numbers, which is why its posterior stayed at 0.62.
+
+**2. Ninken post-kill plunge** (`kill_plunge` column; global `plunge_x`, prior 1.5–5× a normal hit, AoE). The refit puts plunge_x at 3.2 (10–90%: 1.9–4.8). QF-B damage numbers (`replay.dmg`, 191 hits) show Ninken's normal hit at 4,854 = 0.449 × ATK (7 hits) and no read above ~8k, so the plunge is likely ≤ ~1.6–2×. Conditioning on plunge_x ≤ 2 leaves ESS 16. Unresolved conflict; the panel used a ~2/3 capped, 1/3 full mix.
+
+**3. Slime self-aura:** slimes carry their own element permanently, so reactions fire on them. Grenadier vs Ninken reactions (Superconduct, Overloaded, Melt) were already modelled.
+
+**4. Measured per-hit priors** (`data/unit_hits_measured.csv`): Sappho 0.45, Scout 0.449, Large Cryo Slime 0.148, Ninken 0.449 (× ATK). Unit `dmg` is centred there with 20% slack, so the HP curves now identify attack interval instead.
+
+**5. Not fixed (no data tonight):** target-selection AI (sim still uses nearest enemy) and overtime drain mode (P(flat) = 0.43). Combos: tested in round 4, ≤0.03 effect.
+
+**Refit (v6, 10 replays):** EPS 0.12 at ESS 72 (v5 needed EPS 0.15), so the replay trajectories are fit more tightly.
+
+**SF model:** P(Fruity) 0.910 (plunge-capped 0.906); P(Grenadier) 0.766 full / 0.829 capped → 0.80 used.
+
+**Panel (round 5):**
+
+| Agent | w M1 | w M2 |
+|---|---|---|
+| A1 | 0.60 | 0.55 |
+| A2 | 0.60 | 0.55 |
+| A3 | 0.60 | 0.55 |
+| A4 | 0.65 | 0.60 |
+| A5 | 0.60 | 0.55 |
+| **Average** | **0.61** | **0.56** |
+
+All 5 named target-selection AI as the biggest remaining risk.
+
+**Final:** P(Fruity) 0.781 (EV 33.4 vs 18.7), P(Grenadier) 0.655 (EV 36.2 vs 20.4).
+- **Shadow:** 115 Fruity + 85 Grenadier (EV 6,922, SD 2,156). The split flipped toward Fruity versus v5: Fruity is now the more certain pick and Grenadier's edge shrank with the plunge.
+- **Dino:** 200 Grenadier (EV 7,238, SD 3,803).
