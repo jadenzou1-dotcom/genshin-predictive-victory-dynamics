@@ -726,3 +726,21 @@ All 5 named target-selection AI as the biggest remaining risk.
 **Final:** P(Fruity) 0.781 (EV 33.4 vs 18.7), P(Grenadier) 0.655 (EV 36.2 vs 20.4).
 - **Shadow:** 115 Fruity + 85 Grenadier (EV 6,922, SD 2,156). The split flipped toward Fruity versus v5: Fruity is now the more certain pick and Grenadier's edge shrank with the plunge.
 - **Dino:** 200 Grenadier (EV 7,238, SD 3,803).
+
+---
+
+## 2026-10-18 late — Model v7: overtime, targeting, plunge resolved (after bets were placed)
+
+**Overtime is a one-off hit, not a drain.** Both overtime replays show a single step on the winner's team bar ~1.5 s after 00:00, then flat for the remaining ~2.5 s:
+- QF-A M1 (Sappho alone): 0.608 → 0.507 = 10.1% of max HP.
+- QF-B M1 (Grenadier): 0.526 → 0.407 = 11.9% of max HP. Earlier this was flagged as a possible bar rescale; it is this hit.
+
+The loser in both games had a sliver left and died to the hit. The continuous drain (flat HP/s or %/s) is removed. v7 models overtime as pulses of `ot_pct` × max HP to every unit, the first 1.5 s after the clock and then every `ot_period` s. The refit gives ot_pct 0.110 (10–90%: 0.095–0.128); ot_period is unidentified (only the first pulse has been seen).
+
+**Ninken plunge = a normal hit.** QF-B frames 69.9–70.3 s: the plunge (gold ring) lands as 4,854 on several slimes, exactly the normal hit (0.449 × ATK), as AoE. Ninken is already AoE, so the plunge adds little. Prior narrowed to 0.9–1.3×; posterior 1.09. The 795 purple numbers are Superconduct/Electro-Charged on self-aura slimes, matching the sim's flat 800 and confirming the self-aura fix.
+
+**Target selection is now fitted.** New global `target_mode`: nearest foe / lowest current HP / sticky random. Posterior: **lowest HP 0.61**, nearest 0.26, sticky random 0.13. The replays favour focus-fire on the weakest unit over the old nearest-enemy rule. This explains the round-5 puzzle: the trajectory fit wanted a ~3× plunge because nearest-enemy targeting spread Ninken's damage too thin.
+
+**Fit quality:** EPS 0.12 at **ESS 106** (v6: EPS 0.12 at ESS 72; v5: EPS 0.15 at ESS 124), so v7 fits the 10 replays best.
+
+**SF re-run (v7, for the record; bets already placed on v6):** P(Fruity) 0.880, P(Grenadier) 0.733. Pooled at the round-5 panel weights (0.61/0.56): 0.763 / 0.617. Both picks unchanged. v7 would split Shadow 124 Fruity / 76 Grenadier (entered: 115/85, EV gap ≈ 20 points); Dino unchanged at 200 Grenadier.
