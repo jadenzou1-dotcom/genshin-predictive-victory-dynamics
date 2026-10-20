@@ -58,7 +58,7 @@ New session: read this file first, then docs/SUMMARY.md (results so far), docs/D
   - M2: Grenadier beat Ninken in overtime.
   - Points: Shado +5,400 (~19.1k total); Dino +10,000 (~42.5k total).
   - Scoreboard (12 modelled matches): model 9/12, Brier 0.270; crowd 6/12, 0.283.
-- **Model v7 refit on 12 replays:** EPS 0.15, ESS 138. Overtime is a pulse of ~11% max HP every ~8.6 s. target_mode: lowest HP 0.61.
+- **Model v8 (current), refit on 12 replays:** EPS 0.15, ESS 188. Adds the Sappho frost field. Overtime is a pulse of ~11% max HP every ~8 s; target_mode leans lowest HP (0.49). See docs/VERSION_HISTORY.md.
 - **Final, LOCKED 20:06 ET Oct 19** (round ends ~22:00):
   - 3rd place: Fruity (L, 14%, ×200) vs Ninken (R, 86%, ×25). v8 model 0.912.
   - Championship: Saurians (L, 25%, ×105) vs Grenadier (R, 75%, ×30). v8 model 0.867.
