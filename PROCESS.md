@@ -863,3 +863,5 @@ Break-evens at these multipliers: Fruity 0.073, Saurians 0.174. Every stress cas
 - Pooled: P(Fruity) 0.642 (EV/emblem 132 vs 15), P(Saurians) 0.651 (72 vs 17).
 - Shadow: 67 Fruity + 133 Saurians (EV 18,396, SD 8,575).
 - Dino: 200 Fruity (EV 26,388).
+
+**Locked 20:06:** unchanged (Fruity 14% ×200 / Ninken ×25; Saurians 25% ×105 / Grenadier ×30). Final bets: Shadow 67 Fruity + 133 Saurians; Dino 200 Fruity.

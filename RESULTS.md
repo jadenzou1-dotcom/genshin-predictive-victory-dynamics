@@ -333,28 +333,28 @@ The model never sees support rates; "Crowd" is the support rate read as a win pr
 | Team | Mirror Fruity Order | What Does the Ninken Say? |
 | Crowd support | 14% | 86% |
 | Multiplier | ×200 | ×25 |
-| Model win chance | 92.5% | 7.5% |
+| Model win chance | 91.2% | 8.8% |
 
 - **Winner:** pending
-- **Model's call:** Mirror Fruity Order (92.5%)
+- **Model's call:** Mirror Fruity Order (91.2%)
 - **Crowd's call:** What Does the Ninken Say? (86%)
-- **Picks:** PROVISIONAL Shadow: 50 Fruity; Dino: 200 Fruity
-- **Notes:** 3rd-place playoff; PRE-LOCK support; multipliers ESTIMATED from tier table, not read on screen; placements = SF layouts mirrored (unconfirmed); v7 (12 replays) sensitivity 0.90-0.94, units-from-prior 0.91; panel w 0.50 -> 0.532
+- **Picks:** Shadow: 67 Fruity; Dino: 200 Fruity
+- **Notes:** 3rd-place playoff; PRE-LOCK support; multipliers locked (unchanged from 14:49); placements confirmed from board screenshots; v7 (12 replays) sensitivity 0.90-0.94, units-from-prior 0.91; panel w 0.50 -> 0.532; v8 (frost field, 12 replays, EPS 0.15 ESS 188): 0.919; trust w 0.65 from v8 backtest (leakage-discounted)
 
 ### Match 2: Saurians Are the Cutest vs Reserve Grenadier Squad
 
 | | Left | Right |
 |---|---|---|
 | Team | Saurians Are the Cutest | Reserve Grenadier Squad |
-| Crowd support | 29% | 71% |
-| Multiplier | ×70 | ×35 |
-| Model win chance | 85.9% | 14.1% |
+| Crowd support | 25% | 75% |
+| Multiplier | ×105 | ×30 |
+| Model win chance | 86.7% | 13.3% |
 
 - **Winner:** pending
-- **Model's call:** Saurians Are the Cutest (85.9%)
-- **Crowd's call:** Reserve Grenadier Squad (71%)
-- **Picks:** PROVISIONAL Shadow: 150 Saurians; Dino: 0
-- **Notes:** Championship; PRE-LOCK support; multipliers ESTIMATED from tier table, not read on screen; placements = SF layouts mirrored (unconfirmed); v7 sensitivity 0.83-0.88, units-from-prior 0.66; panel w 0.51 -> 0.580
+- **Model's call:** Saurians Are the Cutest (86.7%)
+- **Crowd's call:** Reserve Grenadier Squad (75%)
+- **Picks:** Shadow: 133 Saurians; Dino: 0
+- **Notes:** Championship; PRE-LOCK support; multipliers locked (unchanged from 14:49); placements confirmed from board screenshots; v7 sensitivity 0.83-0.88, units-from-prior 0.66; panel w 0.51 -> 0.580; v8: 0.882; trust w 0.65 from v8 backtest (leakage-discounted)
 
 <details><summary>Crowd snapshots this round</summary>
 
@@ -362,5 +362,9 @@ The model never sees support rates; "Crowd" is the support rate read as a win pr
 |---|---|---|---|---|---|---|---|
 | 1 | 2026-10-18 22:24 | no | 14% | 86% | — | — | 3rd-place playoff pre-lock (multipliers not shown) |
 | 2 | 2026-10-18 22:24 | no | 29% | 71% | — | — | Championship pre-lock (multipliers not shown) |
+| 1 | 2026-10-19 14:49 | no | 14% | 86% | ×200 | ×25 | pre-lock |
+| 2 | 2026-10-19 14:49 | no | 25% | 75% | ×105 | ×30 | pre-lock |
+| 1 | 2026-10-19 20:06 | yes | 14% | 86% | ×200 | ×25 | locked |
+| 2 | 2026-10-19 20:06 | yes | 25% | 75% | ×105 | ×30 | locked |
 
 </details>
