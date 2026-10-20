@@ -199,7 +199,7 @@ Normalized, that's 51.3% / 48.7%. Frostarm gets almost equal weight despite lowe
 
 The model's probabilities were slightly better than the crowd's on Brier score, mostly from being more confident on Fungi. Two matches is far too few to conclude anything. Strategy B (100 Saurians) hit, and Strategy A's Frostarm half missed.
 
-### What the replay showed (`notes/R16-A.md` has the detail)
+### What the replay showed (`rounds/R16-A.md` has the detail)
 Measured with `replay_hp_tracker.py`: OpenCV samples both team HP bars 5×/s → `data/replays/R16-A_hp_bars.csv`. Plus frame inspection and the in-game commentary.
 1. **Fixed 45 s battle clock**, with no visible HP drain inside it. The v2 drain assumption (starting 30–90 s in) was wrong; battles are decided by trading damage.
 2. **Elemental reactions matter.** Sappho alternates Hydro and Cryo and freezes enemies by herself. The Fungi's mixed elements created "a cauldron of elemental reactions".
@@ -865,3 +865,60 @@ Break-evens at these multipliers: Fruity 0.073, Saurians 0.174. Every stress cas
 - Dino: 200 Fruity (EV 26,388).
 
 **Locked 20:06:** unchanged (Fruity 14% ×200 / Ninken ×25; Saurians 25% ×105 / Grenadier ×30). Final bets: Shadow 67 Fruity + 133 Saurians; Dino 200 Fruity.
+
+---
+
+## 2026-10-19 20:10–20:30 — Track-record review and repo reorganization
+
+**Track record, three views** (Jaden asked to separate the at-the-time calls from hindsight):
+
+| View | Correct |
+|---|---|
+| At the time (v1–v6) | 9/12 |
+| v8 leave-one-out | 9/12 |
+| v8 past-only | 11/12 |
+| Crowd | 6/12 (8/14 incl. R16-D) |
+
+- Past-only beats leave-one-out only because of two 50–54% coin flips in R16-B. Brier is about tied (0.122 vs 0.131).
+- Past-only is a hybrid: its parameters come from earlier rounds, but its mechanics were found using every replay. It is the least informative column.
+- Chance odds if model and crowd were both coin flips:
+
+| Event | Chance |
+|---|---|
+| Model beats crowd by ≥3 of 12 | 15% |
+| Model beats crowd by ≥3 of 14 | 17% |
+| Model beats crowd by ≥5 of 14 | 4% |
+| Model ≥11 of 14 on its own | 3% |
+
+- When model and crowd disagreed, the model was right 4 of 5 times.
+- Trust weight clarified: it is the model's share in `P = w · model + (1 − w) · crowd`, not an accuracy rating.
+
+**Recording usage audit.** Used:
+- team HP curves;
+- alive counts;
+- clock and overtime steps;
+- commentary;
+- damage numbers for R16 A–D and QF-B.
+
+Not used:
+- QF-A damage numbers (never run);
+- SF damage numbers (stopped at the time limit; frost field read by hand);
+- frame-by-frame unit positions and targeting;
+- which overhead bar belongs to which unit type;
+- status icons;
+- directly measured attack timing.
+
+None of these could flip a Final pick: the stress tests already push those quantities.
+
+**Repo reorganized:** docs moved into `docs/`:
+- PROCESS.md → `docs/PROCESS_LOG.md`;
+- SKILLS.md → `docs/SKILLS.md`;
+- notes/ → `docs/rounds/`.
+
+New docs:
+- `docs/SUMMARY.md`;
+- `docs/VERSION_HISTORY.md`;
+- `docs/MECHANICS.md`;
+- `docs/DECISIONS.md` (README's strategy decisions moved here and extended).
+
+README is now an index plus the repo layout.

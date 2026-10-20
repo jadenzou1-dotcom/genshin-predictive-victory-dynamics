@@ -5,8 +5,8 @@ What it took to build this project, grouped by area. Items marked *(planned)* ar
 ## Probability and decision theory
 - **Expected-value analysis** of a binary bet with a payout floor: `EV = p·M + (1−p)·10`, plus breakeven win probabilities for every option.
 - **Risk-adjusted decision making:** Sharpe ratio, mean-variance utility, and the tangency (max-Sharpe) portfolio for independent bets, with weights `∝ excess EV / variance`.
-- **Finding a use-case gap in the Sharpe ratio:** showed with a worked counterexample that cutting a bet's payout (a strictly worse bet) *raises* its Sharpe when stakes can't be levered, and switched to mean-variance certainty equivalent (`EV − λ/2·Var`). See `PROCESS.md`.
-- **Recognizing when a metric doesn't apply:** showed that with a fixed payout floor Sharpe reduces to `sqrt(p/(1−p))` and ignores payout, and that without leverage, max-Sharpe isn't max-return. Documented in `PROCESS.md`.
+- **Finding a use-case gap in the Sharpe ratio:** showed with a worked counterexample that cutting a bet's payout (a strictly worse bet) *raises* its Sharpe when stakes can't be levered, and switched to mean-variance certainty equivalent (`EV − λ/2·Var`). See `PROCESS_LOG.md`.
+- **Recognizing when a metric doesn't apply:** showed that with a fixed payout floor Sharpe reduces to `sqrt(p/(1−p))` and ignores payout, and that without leverage, max-Sharpe isn't max-return. Documented in `PROCESS_LOG.md`.
 - **Portfolio construction:** diversification across similar-risk independent bets (Sharpe 3.28 → 4.26), and why adding a high-variance bet lowers it.
 - **Objective selection:** separating risk-neutral (leaderboard) and risk-averse goals, and running both as a controlled comparison across two accounts.
 

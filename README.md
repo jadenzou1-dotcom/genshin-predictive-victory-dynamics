@@ -8,109 +8,61 @@ The goal is to beat the crowd's support rate by combining (1) a Monte Carlo batt
 
 ## The event in one paragraph
 
-There are 16 simulated battles across 8 rounds (Round of 16 → Final). Each round, you commit up to 100 Victory Emblems per match to one side. The **support rate** (the share of all players' emblems on each side) sets a **score multiplier**: the less popular the side, the higher the multiplier. Support rates lock 4 hours before the round ends. A correct pick scores `emblems × multiplier`. A wrong pick still scores `emblems × 10`. Reward tiers run up to a 16,000 prediction score.
+There are 16 simulated battles across 8 rounds (Round of 16 → Final). Each round, you commit Victory Emblems to one side of each match (up to 300 per match; 100 new emblems per day, cap 300). The **support rate** (the share of all players' emblems on each side) sets a **score multiplier**: the less popular the side, the higher the multiplier. Support rates lock 4 hours before the round ends. A correct pick scores `emblems × multiplier`. A wrong pick still scores `emblems × 10`. Reward tiers run up to a 16,000 prediction score.
+
+## Documentation
+
+| Doc | What it covers |
+|---|---|
+| [docs/SUMMARY.md](docs/SUMMARY.md) | **Start here.** Overall results, the 14-match track record (model vs crowd), what worked and what didn't, points |
+| [docs/VERSION_HISTORY.md](docs/VERSION_HISTORY.md) | Model v1 → v8: what each version changed, why, and how well it fit |
+| [docs/MECHANICS.md](docs/MECHANICS.md) | Game rules and battle mechanics measured from replays and screens, plus the payout table |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | Every major decision and its reasoning: objective (Sharpe → CE), λ, trust weights, panel, pacing, betting against the crowd |
+| [docs/PROCESS_LOG.md](docs/PROCESS_LOG.md) | Full dated log of everything done, in order |
+| [docs/rounds/](docs/rounds/) | Early per-round analysis notes (R16-A to R16-C) |
+| [docs/SKILLS.md](docs/SKILLS.md) | Skills used and developed |
+| [RESULTS.md](RESULTS.md) | Generated match-by-match results page (`python make_results.py`) |
+| [HANDOFF.md](HANDOFF.md) | Current state and next steps, for picking up in a new session |
 
 ## Workflow (each round)
 
 1. **Capture.** Screenshot each unit's detail card (stats, tags, skill text) and the board layout.
 2. **Record.** Add new unit types to `data/units.csv` and each unit's grid position to `data/placements.csv`. Log support rates and multipliers to `data/matches.csv`.
 3. **Simulate.** Run `python sim.py <round>`, e.g. `python sim.py R16-A`. This prints P(left wins), how sensitive that is to the biggest unknowns, and the expected value per emblem for each side.
-4. **Decide.** Run `python strategies.py <round>`. Two strategies run in parallel, one per account: **A (risk-adjusted, main account)** and **B (max-EV, second account)**. A was max-Sharpe for R16-A and R16-B and switches to max certainty equivalent (CE) from here on; see [Strategy decisions](#strategy-decisions). It also scores two paper benchmarks (naive-underdog, crowd-favourite). Commit shortly before the support-rate lock so the multiplier you see is close to final.
+4. **Decide.** Run `python strategies.py <round> --pool <emblems> --lambda 2.1e-4 --linw <w1>,<w2>`. Two strategies run in parallel, one per account: **A (risk-adjusted, main account)** and **B (max-EV, second account)**. A was max-Sharpe for R16-A and R16-B and switches to max certainty equivalent (CE) from here on; see [docs/DECISIONS.md](docs/DECISIONS.md). It also scores two paper benchmarks (naive-underdog, crowd-favourite). Commit shortly before the support-rate lock so the multiplier you see is close to final.
    - **Log the crowd.** Before the round closes, add a row per match to `data/crowd_log.csv` with the support rates and multipliers on screen. The game stops showing them once the round ends.
-5. **Calibrate.** After the battle, run `python -m replay.extract <video> <round> data/replays/extracted` (team + unit HP bars, clock, commentary), `python -m replay.observe <round>` (battle-time curves) and `python -m replay.dmg <video> <round>` (damage numbers; `python -m replay.attribute <round>` maps them to attackers). Log winner / remaining HP / wipe time to `data/replays/<round>_outcomes.csv`, note unit behaviour in `data/units.csv` and `notes/`, then run `python calibrate_traj.py 3000 2` to refit the model to every replay so far, and `python make_results.py` to refresh [RESULTS.md](RESULTS.md). Every change is logged in [`PROCESS.md`](PROCESS.md).
-
-## Payout math
-
-With `p` = true win probability of the side you back and `M` = its multiplier:
-
-```
-EV per emblem = p·M + (1 − p)·10
-```
-
-The multiplier is a **step function of support rate**, not a smooth curve (the earlier fit `M ≈ 20 + 28·(1−s)/s` is retired). Support/multiplier pairs seen so far:
-
-| Support | Multiplier | Source |
-|---|---|---|
-| 13% | ×200 (cap?) | own screenshot, pre-lock (R16-A) |
-| 17–25% | ×105 | own screenshots (R16-B locked, QF-A) + Game8 |
-| 27–35% | ×70 | Game8 (27%→×105 also seen there, so the 25/27 edge is fuzzy) |
-| 39% | **×70 (ours) vs ×50 (Game8)** | conflicting: edge near 39% |
-| 61% | **×35 (ours) vs ×40 (Game8)** | conflicting: edge near 61% |
-| 65–70% | ×35 | Game8 |
-| 73–83% | ×30 | own + Game8 |
-| 87–88% | ×25 | own (pre-lock) + Game8 |
-
-Tier edges are not known exactly, and displayed support is rounded, so **near 39/61 the multiplier can jump**. Inside a tier the payout is flat, so a 17% underdog pays the same as a 25% one. Always read the multiplier on screen at lock rather than inferring it.
-
-Because the score is linear in emblems and wrong picks still pay, EV maximization puts all emblems on the single best pick. Splitting only buys lower variance.
-
-## Strategy decisions
-
-### 1. Sharpe ratio was the wrong objective, and I only caught it by intuition
-
-Strategy A started as **max-Sharpe**, the standard risk-adjusted yardstick in quant finance. I didn't question it in R16-A, because there it gave a sensible answer: split across the two favourites (51 Fungi / 49 Frostarm).
-
-In R16-B (the second round) it produced an allocation that felt wrong. It put **28** emblems on Elemental Dye (model 78.5% to win, ×105) and **72** on Blazing Beasts (60.5%, ×30), even though Elemental Dye was better on *both* win probability *and* payout. Sharpe scored the split higher, but it was plainly a worse decision.
-
-To find out why, I reduced it to two coins:
-
-| Coin | Lose | Win | EV | Sharpe |
-|---|---|---|---|---|
-| 2 | 40% → 10 | 60% → 50 | 34.0 | 1.22 |
-| 2′ (win payout cut to 20) | 40% → 10 | 60% → 20 | 16.0 | **2.04** |
-
-Making the bet strictly worse (same odds, smaller payout, half the EV) *raised* its Sharpe. With a fixed 10-point floor, Sharpe on a binary bet reduces to `sqrt(p/(1−p))`: the payout cancels out entirely, so Sharpe only rewards how *reliably* a bet wins, never how *much*.
-
-Sharpe isn't wrong in general. It's the right yardstick when you can lever a portfolio up or down to your risk target. Here stakes are capped at 100 emblems, there's no leverage, payoffs are lumpy and skewed, and the downside is bounded by the floor. Under those conditions max-Sharpe just picks the smallest swings and leaves EV on the table. Full write-up: [PROCESS.md, 2026-10-13 "where the Sharpe ratio falls short"](PROCESS.md).
-
-(Honest footnote: in R16-B the Sharpe split happened to score better, 2,440 vs 1,000 for all-in on Dye, because Dye lost. One outcome doesn't make it the right rule.)
-
-### 2. Switching Strategy A to certainty equivalent (CE)
-
-From here on, Strategy A maximizes
-
-```
-CE = EV − (λ/2) · Var
-```
-
-over the emblem split. EV counts in full, so a bigger payout always makes a bet better, and risk is a separate penalty set by one dial, λ (risk aversion). λ = 0 is pure EV (Strategy B), and larger λ trades EV for steadiness. This is the textbook mean-variance utility Sharpe itself comes from: with leverage, max-CE means "hold the max-Sharpe portfolio, scaled by 1/λ". Without leverage that scaling step isn't available, so CE is optimized directly. λ is fixed once for the rest of the event so the A-vs-B comparison stays clean. R16-A and R16-B stay logged as max-Sharpe rounds.
-
-**λ fixed (2026-10-16):** a five-agent panel recommended 3e-4, 1e-4, 3e-4, 2.5e-4 and 1e-4; Strategy A uses their average, **λ = 2.1e-4**, for the rest of the event. Model-vs-crowd trust from the same panel (linear pooling): 34% model on QF-A M1, 32% on M2. Standard (2026-10-16): 35% model / 65% crowd. **Updated 2026-10-17 after QF-A (panel round 3): ~60% model when all units have been seen in replays, ~35% when key units are unseen; λ ≈ 0 (panel average 4.2e-5) once the 16k tier is guaranteed by the ×10 floor.**
-
-### 3. Saving emblems for later rounds, when the model knows more
-
-The model gets more accurate as more battle replays come in:
-- Calibration is cumulative: every replay refits the shared mechanics (time scale, counter strength, AoE radius, overtime).
-- A unit's fitted strength only gets weight `n/(n+2)` after `n` replays, so units seen several times are predicted much better than new ones.
-- Predictions for lineups of unseen units are pulled toward 50% (tempering), which shrinks the edge on early rounds by design.
-
-Group C was entirely unseen units, so the model's edge there was thin (one lean, one coin flip). The quarterfinals are fought by R16 winners whose units will already have been watched in replays. So the plan is to **skip Groups C and D and save emblems for the quarterfinals**, where an emblem should be worth more.
-
-This only works if unused emblems carry over (the counter reads 100/300, which is ambiguous). The plan was to test it (Account A skips Group C, Account B bets it as a control), but in the end both accounts skipped C and D, so the test didn't run. Both accounts later showed 300/300, which is consistent with rollover up to a cap of 300; if 300 is a cap, skipping further rounds wastes emblems. Two other caveats: the slider caps at 100 per match, so 300 banked emblems need 3 matches to spend; and every skipped round forgoes at least the 10-per-emblem floor.
+5. **Calibrate.** After the battle, run `python -m replay.extract <video> <round> data/replays/extracted` (team + unit HP bars, clock, commentary), `python -m replay.observe <round>` (battle-time curves) and `python -m replay.dmg <video> <round>` (damage numbers; `python -m replay.attribute <round>` maps them to attackers). Log winner / remaining HP / wipe time to `data/replays/<round>_outcomes.csv`, note unit behaviour in `data/units.csv` and `docs/rounds/`, then run `python calibrate_traj.py 3000 2` to refit the model to every replay so far, and `python make_results.py` to refresh [RESULTS.md](RESULTS.md). Every change is logged in [`docs/PROCESS_LOG.md`](docs/PROCESS_LOG.md).
 
 ## Repo layout
 
-| Path | What it is |
-|---|---|
-| `data/units.csv` | One row per unit type: stats, counter tags, skill flags, skill text, replay findings |
-| `data/placements.csv` | One row per unit per match: team, side, grid row and column |
-| `data/matches.csv` | One row per match: crowd odds, model probability, pick, result, score. This is the track record |
-| `data/crowd_log.csv` | Timestamped snapshots of each side's support rate and multiplier. The game hides these after the round ends |
-| `sim.py` | Monte Carlo battle model (elements, reactions, kiting, 45 s clock) plus EV calculation |
-| `calibrate.py` | Approximate Bayesian calibration of sim parameters to observed replays (3-number summary per replay; superseded by `calibrate_traj.py`) |
-| `calibrate_traj.py` | Kernel ABC calibration against full fight trajectories: both team HP curves and the share of bodies alive, second by second |
-| `replay/` | Replay extraction framework. `extract.py` reads a recording at 10 frames/s: team HP bars, every overhead unit HP bar (`bars.py`), the clock (OCR) and commentary lines (OCR). `observe.py` turns that into per-second battle-time curves |
-| `data/replays/extracted/` | Extractor output per round: `*_frames.csv`, `*_bars.csv`, `*_events.csv` (commentary log), `*_curves.csv` |
-| `blend.py` | Stacks the sim with the crowd's support rate in log-odds space (Bayesian weight, leave-one-out check) |
-| `replay_hp_tracker.py` | OpenCV: extracts both team HP bars from a replay video (older, team bars only) |
-| `data/replays/` | HP-bar traces and observed outcomes per round |
-| `data/calibration_samples.csv` | Weighted posterior parameter draws used by `sim.py` |
-| `strategies.py` | Per-round emblem allocation for Strategies A and B plus paper benchmarks (A still implements max-Sharpe; CE switch pending) |
-| `allocation_curve.py` | Sweeps Strategy A splits and plots Sharpe / EV / SD to `charts/` |
-| `notes/` | Per-round analysis and replay observations |
-| `RESULTS.md` | Readable results page generated from the CSVs by `make_results.py` (don't edit by hand) |
-| `PROCESS.md` | How the model was developed, every assumption, and a dated change log |
-| `SKILLS.md` | Skills used and developed to build this project |
+```
+├── README.md, RESULTS.md, HANDOFF.md
+├── docs/                      write-ups (see Documentation above)
+├── sim.py                     Monte Carlo battle simulator (core model)
+├── calibrate_traj.py          fits the sim to replay trajectories (kernel ABC) -> data/calibration_samples.csv
+├── loo.py                     honest backtests: leave-one-out and past-only
+├── strategies.py              emblem allocation: Strategy A (CE) and B (EV), benchmarks, break-evens
+├── blend.py                   model/crowd blending (log-odds; trust-weight checks)
+├── margin_check.py            where an actual result falls in the model's own outcome distribution
+├── make_results.py            builds RESULTS.md from the CSVs
+├── replay/                    replay video readers
+│   ├── extract.py             team/unit HP bars, clock and commentary (OCR) per frame
+│   ├── observe.py             per-second battle curves from the extracted frames
+│   ├── bars.py                overhead HP-bar detector
+│   ├── dmg.py                 damage-number reader (OCR)
+│   └── attribute.py           maps damage values to attacking unit types
+├── calibrate.py, replay_hp_tracker.py, allocation_curve.py    early tools, superseded (kept for history)
+├── charts/                    early allocation charts
+└── data/
+    ├── units.csv              every unit type: stats, tags, element, special mechanics flags, replay notes
+    ├── placements.csv         every unit's grid position per match
+    ├── matches.csv            every match: crowd, multipliers, model P, picks, winner, points, Brier (the track record)
+    ├── crowd_log.csv          timestamped support-rate / multiplier snapshots
+    ├── unit_hits_measured.csv per-hit damage read from replays
+    ├── calibration_samples.csv current posterior draws used by sim.py
+    ├── backtest.csv, backtest_v8_loo.txt   backtest outputs (v5, v8)
+    └── replays/               <round>_outcomes.csv (winner, HP left, wipe time) and extracted/ per-frame data
+```
 
 ## Results so far
 

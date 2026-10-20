@@ -1,6 +1,6 @@
-# Handoff: start here (state as of 2026-10-19 morning)
+# Handoff: start here (state as of 2026-10-19 20:30, Final locked)
 
-New session: read this file first, then README.md (method, tier table, strategy decisions) and the last sections of PROCESS.md (dated log).
+New session: read this file first, then docs/SUMMARY.md (results so far), docs/DECISIONS.md (reasoning), docs/MECHANICS.md (measured rules), docs/VERSION_HISTORY.md, and the last sections of docs/PROCESS_LOG.md (dated log). README.md has the repo layout.
 
 ## Who / what
 - Owner: Jaden. Two game accounts:
@@ -59,16 +59,11 @@ New session: read this file first, then README.md (method, tier table, strategy 
   - Points: Shado +5,400 (~19.1k total); Dino +10,000 (~42.5k total).
   - Scoreboard (12 modelled matches): model 9/12, Brier 0.270; crowd 6/12, 0.283.
 - **Model v7 refit on 12 replays:** EPS 0.15, ESS 138. Overtime is a pulse of ~11% max HP every ~8.6 s. target_mode: lowest HP 0.61.
-- **Final (round ends ~22:00 ET Oct 19; support locks ~18:00 ET):**
-  - 3rd place: Fruity (L, crowd 14%, est. ×200) vs Ninken (R, 86%, est. ×25). Model P(Fruity) 0.925; units from prior 0.91.
-  - Championship: Saurians (L, 29%, est. ×70) vs Grenadier (R, 71%, est. ×35). Model P(Saurians) 0.859; units from prior 0.66.
-  - v8 (frost field) model: Fruity 0.919, Saurians 0.882. Trust w = 0.65 (backtest optimum 1.0, discounted for leakage; panel said 0.50) → pooled 0.65 / 0.68.
-  - **Provisional bets (200 per account):** Shado ~60 Fruity + ~140 Saurians; Dino 200 Fruity.
-- **Done before the lock (Oct 19):** v8 Sappho frost field + refit (ESS 188); v8 leave-one-out backtest (past-only 11/12, Brier 0.122). Still needed from Jaden: Final board screenshots.
-- **To do at lock:**
-  1. Get screenshots of both Final boards. Placements in `data/placements.csv` (round `Final`) are the SF layouts mirrored and unconfirmed. Fix them, then re-run `python3 sim.py Final 4000`.
-  2. Read the real multipliers into `data/matches.csv` and re-run `strategies.py Final --pool 200 --lambda 2.1e-4 --linw 0.65,0.65`.
-  3. If Saurians' multiplier ends up close to Grenadier's, the Championship break-even nears 0.5: re-check that pick. Fruity holds even at ×105.
+- **Final, LOCKED 20:06 ET Oct 19** (round ends ~22:00):
+  - 3rd place: Fruity (L, 14%, ×200) vs Ninken (R, 86%, ×25). v8 model 0.912.
+  - Championship: Saurians (L, 25%, ×105) vs Grenadier (R, 75%, ×30). v8 model 0.867.
+  - Trust w = 0.65 → pooled 0.64 / 0.65. Worst stress tests: 0.62 / 0.66.
+  - **Bets:** Shado 67 Fruity + 133 Saurians; Dino 200 Fruity.
 - **After the Final:** log the results, process the replay, and write the summary (README results + what worked / didn't).
 - **Open:** account names (Shadow/Dino) are in the pushed repo, which conflicts with the earlier "no real account names" rule. Jaden hasn't decided between keeping them, renaming them going forward, or scrubbing the history.
 
