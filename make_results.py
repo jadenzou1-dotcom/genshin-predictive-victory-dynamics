@@ -11,6 +11,7 @@ MATCHES = "data/matches.csv"
 CROWD = "data/crowd_log.csv"
 BOARD = "data/leaderboard.csv"
 BACKTEST = "data/backtest_v8.csv"
+STRICT = "data/backtest_strict_wf.csv"
 ROOT = Path(__file__).parent
 OUT = "RESULTS.md"
 
@@ -55,6 +56,7 @@ SHORT = {
 }
 short = lambda t: SHORT.get(t, t)
 backtest = {(b["round"], b["match"]): b for b in load(BACKTEST)}
+strict = {(b["round"], b["match"]): b for b in load(STRICT)}
 ROUND_LABEL = {("Final", "1"): "3rd&nbsp;place", ("Final", "2"): "Final"}
 
 decided = [m for m in matches if m["winner"] in ("L", "R")]
@@ -63,7 +65,8 @@ scored = [m for m in decided if num(m["model_p_left"]) is not None]  # the match
 # each predictor as P(left) per match; crowd = support rate
 PREDICTORS = [
     ("live", "**Live model**", lambda m: num(m["model_p_left"])),
-    ("wf", "Walk-forward backtest", lambda m: num(backtest.get((m["round"], m["match"]), {}).get("past_only_p_left"))),
+    ("swf", "Strict walk-forward", lambda m: num(strict.get((m["round"], m["match"]), {}).get("strict_wf_p_left"))),
+    ("wf", "Walk-forward (v8 priors)", lambda m: num(backtest.get((m["round"], m["match"]), {}).get("past_only_p_left"))),
     ("loo", "Leave-one-out CV", lambda m: num(backtest.get((m["round"], m["match"]), {}).get("loo_p_left"))),
     ("crowd", "Crowd", lambda m: None if num(m["left_support_pct"]) is None else num(m["left_support_pct"]) / 100),
 ]
@@ -94,10 +97,14 @@ crowd_all = sum((num(m["left_support_pct"]) > 50) == (m["winner"] == "L") for m 
 DESC = {
     "live": ("The call actually made before the match, by the model version of the day (v1–v8)",
              "**None**: true out-of-sample"),
-    "wf": ("Final model (v8), refit using only rounds before the match",
-           "Structural only: v8's mechanics were found by watching every replay"),
+    "swf": ("v8's battle engine, but each measured value or replay-discovered mechanic is held back until "
+            "the round after its source replay; refit on earlier rounds only (`walk_forward_strict.py`)",
+            "Minimal: only the engine's general design (grid, targeting, reactions) came later"),
+    "wf": ("Final model (v8) with its full priors, refit on earlier rounds only",
+           "Structural: its priors and mechanics (overtime pulse, frost field, hit sizes, squad HP) "
+           "were measured in later replays"),
     "loo": ("Final model (v8), refit on every other match, earlier and later",
-            "Parameter + structural: later rounds leak into the fit"),
+            "Structural + parameter: later rounds are also in the fit"),
     "crowd": ("Support rate read as a win probability", "None"),
 }
 
@@ -113,26 +120,34 @@ for k, label, _ in PREDICTORS:
     track.append(f"| {label} | {DESC[k][0]} | {DESC[k][1]} | {cnt} | {b:.3f} |")
 track += [
     "",
-    "- **Live is the headline.** It is the only model row with no look-ahead bias. The two backtests "
-    "show what the finished model would have called. The gap between live "
-    f"({S['live'][0]}/{n}) and walk-forward ({S['wf'][0]}/{n}) is roughly what the mechanics learned during "
-    "the event were worth. Two of walk-forward's wins (R16-B) are 50–51% coin flips, so treat 13/14 as about 11–13.",
+    "- **Live is the headline.** It is the only row with no look-ahead bias at all.",
+    f"- **Strict walk-forward ({S['swf'][0]}/{n}) is the fair backtest.** It replays the final engine with only "
+    f"what was knowable before each match. It lands near live ({S['live'][0]}/{n}): it misses all three of live's misses "
+    "(R16-A M2, R16-B M1, SF M1) plus R16-B M2 (a 52% call) and QF-B M1. Its Brier score is a little better than live's, so its probabilities "
+    "are better calibrated, but it picks fewer winners.",
+    f"- **Walk-forward with v8 priors ({S['wf'][0]}/{n}) is flattered by look-ahead.** Its only difference from strict "
+    "is priors and mechanics measured in later replays, so the jump from "
+    f"{S['swf'][0]} to {S['wf'][0]} is mostly leakage. Two of its wins "
+    "(R16-B) are 50–51% coin flips anyway.",
+    "- **Noise:** one row beating another by 1–2 matches is within noise. On the Final, where strict and v8 "
+    "have the same information, two separate fits give 0.92 / 0.74 and 0.92 / 0.88.",
     "- **Brier score** is the mean squared error of the probability (0 is perfect, 0.25 is always saying 50%). It rewards calibrated confidence, not just the right side.",
-    f"- **R16-D** had no model call (the losing teams' unit cards were never captured). The crowd went "
-    f"{crowd_all} / {len(decided)} counting it.",
+    f"- **Why 14, not 16:** the sim needs every unit's stats and grid position. For R16-D the losing teams' "
+    f"unit cards and the board were never captured, so no model (live or backtest) can run those two matches. "
+    f"The crowd went {crowd_all} / {len(decided)} counting them.",
     "",
     "**Every match**",
     "",
     "Each model or crowd cell shows the side it favoured (L/R) and how confident it was. The winner is in bold.",
     "",
-    "| Round | Left vs Right | Live model | Walk-forward | Leave-one-out | Crowd | Winner |",
-    "|---|---|---|---|---|---|---|",
+    "| Round | Left vs Right | Live model | Strict walk-forward | Walk-forward (v8 priors) | Leave-one-out | Crowd | Winner |",
+    "|---|---|---|---|---|---|---|---|",
 ]
 for m in decided:
     w = m["winner"]
     L, R = short(m["left_team"]), short(m["right_team"])
     L, R = (f"**{L}**", R) if w == "L" else (L, f"**{R}**")
-    rnd = ROUND_LABEL.get((m["round"], m["match"]), f"{m['round']}&nbsp;M{m['match']}")
+    rnd = ROUND_LABEL.get((m["round"], m["match"]), f"{m['round'].replace('-', '&#8209;')}&nbsp;M{m['match']}")
     cells = [call(get(m), w) for _, _, get in PREDICTORS]
     track.append(f"| {rnd} | {L} vs {R} | " + " | ".join(cells) + f" | {w} |")
 totals = [f"**{S[k][0]}&nbsp;/&nbsp;{n}**" for k, _, _ in PREDICTORS]
@@ -150,7 +165,7 @@ def inject(path, heading_level):
         return
     a, b = s.index(START) + len(START), s.index(END)
     body = "\n".join(track).replace("**Scoreboard", "**Scoreboard", 1)
-    p.write_text(s[:a] + "\n<!-- generated by make_results.py from data/matches.csv and data/backtest_v8.csv; do not edit by hand -->\n\n"
+    p.write_text(s[:a] + "\n<!-- generated by make_results.py from data/matches.csv, data/backtest_v8.csv and data/backtest_strict_wf.csv; do not edit by hand -->\n\n"
                  + body + "\n" + s[b:], encoding="utf-8")
 
 

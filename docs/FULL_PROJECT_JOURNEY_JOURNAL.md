@@ -954,3 +954,18 @@ Renamed so the names say what the files are:
 - `docs/SKILLS.md` → `docs/SKILLS_DEVELOPED_DURING_PROJECT.md`: the skills developed during the project.
 
 All links were updated.
+
+## 2026-10-22: Strict walk-forward backtest
+
+**Why:** the walk-forward in `loo.py` refits only on earlier rounds, but its draws come from v8's priors. Those were measured in later replays: for example, the overtime pulse at ~11% max HP was used before any overtime had been seen.
+
+**What `walk_forward_strict.py` does:** for each round it rebuilds the prior from only what was knowable before that round (`KNOWN_FROM`).
+- **Measured values** get a vague prior until the round after their source replay: counters ≈ 1×, squad HP, flat reaction damage, overtime, per-unit hit sizes.
+- **Discovered mechanics** are switched off until then: Sappho's splash, the Ninken plunge, slime self-aura, the frost field.
+- **Fit:** kernel ABC on earlier replays only, with 1,500 draws, M = 12 and a target ESS of 40. ESS came out at 62–88 per round.
+
+**Result:** strict walk-forward 9 / 14, Brier 0.210. For comparison: live 11 / 14 (0.234), walk-forward with v8 priors 13 / 14 (0.106), leave-one-out 11 / 14 (0.114), crowd 6 / 14 (0.336).
+- **Misses:** strict misses all three of live's misses (R16-A M2, R16-B M1, SF M1), plus R16-B M2 (52%) and QF-B M1.
+- **Reading:** the 13 / 14 walk-forward is mostly prior leakage.
+- **Noise:** at the Final, where strict and v8 have the same information, strict gives 0.915 / 0.736 vs v8's 0.919 / 0.882. Per-match noise is large, so differences of 1–2 matches between rows aren't meaningful.
+- **Why 14, not 16:** R16-D has no model column because the losing teams' unit cards and the board were never captured.

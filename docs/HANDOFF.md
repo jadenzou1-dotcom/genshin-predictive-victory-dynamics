@@ -2,6 +2,8 @@
 
 **The event is over.** Final standings on the friends board: Dino 82,500 (1st), Shado 46,450 (2nd), best other friend 16,600. In the Final, Fruity and Saurians both won, so every bet paid. The model was right on 11 of 14 calls made at the time, against 6 of 14 for the crowd. The results are logged in `data/matches.csv` and written up in the README and `docs/SUMMARY.md`.
 
+**Backtests:** live 11/14; strict walk-forward 9/14 (`walk_forward_strict.py`: only what was knowable before each round); walk-forward with v8 priors 13/14; leave-one-out 11/14; crowd 6/14. See the README track record.
+
 **Still open, if the project is picked back up:**
 - **Final replay:** process the Final replay (`Finals_and_3rd_place.mp4`): extract, write outcomes, refit to 14 replays.
 - **Account names:** Shadow/Dino are in the pushed history. Keep them, rename them going forward, or scrub the history.
