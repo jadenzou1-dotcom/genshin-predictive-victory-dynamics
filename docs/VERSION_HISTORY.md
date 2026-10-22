@@ -38,7 +38,7 @@ Lesson from R16-A: counter tags are a tie-breaker; raw HP × ATK dominates.
   - Sappho freezes enemies by herself (Hydro + Cryo);
   - ranged bosses kite melee.
 - **Added:** elemental auras and reactions (Freeze, Vaporize/Melt, Electro-Charged, Superconduct, Swirl), dual-element units, a shatter bonus, kiting.
-- **Calibration:** first a 3-number replay summary (`calibrate.py`), then full per-second trajectories (`calibrate_traj.py`) from the replay extractor (`replay/`).
+- **Calibration:** first a 3-number replay summary (`legacy/calibrate.py`), then full per-second trajectories (`calibrate_traj.py`) from the replay extractor (`replay/`).
 - **Damage-number reader (`replay/dmg.py`):** transformative reactions deal a flat ~800; a normal hit is a fixed fraction of ATK.
 
 ## v4: hit-size decomposition

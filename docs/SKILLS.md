@@ -26,7 +26,7 @@ What it took to build this project, grouped by area. Items marked *(planned)* ar
 - **Retrodiction vs prediction:** keeping posterior fits separate from honest out-of-sample tests.
 
 ## Computer vision and signal extraction
-- **OpenCV video analysis:** pixel-color segmentation of both team HP bars, sampled 5×/s from 60 fps replays (`replay_hp_tracker.py`), producing HP-vs-time traces.
+- **OpenCV video analysis:** pixel-color segmentation of both team HP bars, sampled 5×/s from 60 fps replays (`legacy/replay_hp_tracker.py`, later `replay/extract.py`), producing HP-vs-time traces.
 - Using those traces to measure battle length, wipe times, damage phases and the absence of HP drain, and turning them into calibration targets.
 - **ffmpeg** frame extraction and contact sheets for qualitative behaviour analysis (targeting, kiting, reactions).
 
@@ -36,7 +36,7 @@ What it took to build this project, grouped by area. Items marked *(planned)* ar
 
 ## Software and tooling
 - **Python** (stdlib, OpenCV, matplotlib) for the simulator, calibrator, strategy engine, video tracker and charts.
-- **Reproducibility:** seeded runs, a scripted per-round workflow (`sim.py` → `strategies.py` → `allocation_curve.py` → replay → `calibrate.py`), and a dated change log.
+- **Reproducibility:** seeded runs, a scripted per-round workflow (`sim.py` → `strategies.py` → replay extraction → `calibrate_traj.py` → `make_results.py`), and a dated change log.
 
 ## Research practice
 - **Writing down assumptions before results**, and logging corrections as dated entries instead of overwriting them.

@@ -7,7 +7,7 @@ v3 (after the R16-A replay):
   * dual-element units (e.g. "Hydro|Cryo") alternate elements and so can
     freeze on their own; kiting ranged units retreat from melee
   * parameters seen in a replay are drawn from data/calibration_samples.csv
-    (approximate-Bayesian posterior, see calibrate.py); unseen units and
+    (approximate-Bayesian posterior, see calibrate_traj.py); unseen units and
     unseen mechanics are drawn from the prior.
 
 Usage: python sim.py <round> [runs] [--prior]

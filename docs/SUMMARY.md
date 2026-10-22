@@ -2,6 +2,8 @@
 
 **What:** a quantitative model for betting on Genshin Impact's *Predictive Victory Dynamics* event (Oct 12–19, 2026).
 
+**Outcome:** the two accounts finished **1st (Dino, 82,500) and 2nd (Shadow, 46,450)** on the friends leaderboard; the best other friend finished on 16,600. The model was right on **11 of 14** matches it called before they were played, against **6 of 14** for the crowd.
+
 **The bet:** each match is an auto-battle between two unit teams. Players stake emblems on a side, and the less popular side pays a higher multiplier.
 
 **The model:** a Monte Carlo battle simulation built from unit stat cards, calibrated against frame-by-frame readings of every replay. It is blended with the crowd's support rate and fed into two allocation strategies:
@@ -15,13 +17,13 @@ Related docs:
 - [PROCESS_LOG.md](PROCESS_LOG.md): the full dated log.
 - [../RESULTS.md](../RESULTS.md): match-by-match detail.
 
-## Track record (14 decided matches, before the Final)
+## Track record (all 16 matches)
 
 Model and crowd show which side each picked (L/R) and its probability for that side.
 - **At the time:** the call actually made before the match, by the model version current then (v1–v6).
 - **Leave-one-out:** today's model (v8), fitted to every other replay but not that match's.
 
-R16-D had no model call: the losing teams' unit cards were never captured.
+R16-D had no model call: the losing teams' unit cards were never captured. The Final was never refit, so v8's Final calls are genuinely out of sample (v8 was the live model).
 
 | Match | Left vs Right | At the time | Leave-one-out (v8) | Crowd | Winner |
 |---|---|---|---|---|---|
@@ -39,13 +41,22 @@ R16-D had no model call: the losing teams' unit cards were never captured.
 | QF-B M2 | Ninken vs Round-and-Frost | L 56% ✓ | L 68% ✓ | L 77% ✓ | L |
 | SF M1 | Mirror Fruity vs Saurians | L 91% ✗ | L 61% ✗ | L 58% ✗ | R |
 | SF M2 | Reserve Grenadier vs Ninken | L 80% ✓ | L 79% ✓ | R 53% ✗ | L |
+| Final 3rd | Mirror Fruity vs Ninken | L 91% ✓ | (live model) | R 86% ✗ | L |
+| Final | Saurians vs Reserve Grenadier | L 87% ✓ | (live model) | R 75% ✗ | L |
 
-| Predictor (12 modelled matches) | Correct | Mean Brier (lower is better) |
+| Predictor (14 modelled matches) | Correct | Mean Brier (lower is better) |
 |---|---|---|
-| Model at the time (v1–v6) | **9 / 12** | 0.270 |
+| **Model at the time (v1–v8)** | **11 / 14** | **0.234** |
+| Crowd | 6 / 14 (8 / 16 incl. R16-D) | 0.336 |
+
+Backtests on the 12 pre-Final matches (same 12 for every row):
+
+| Predictor (12 pre-Final matches) | Correct | Mean Brier |
+|---|---|---|
+| Model at the time (v1–v6) | 9 / 12 | 0.270 |
 | v8 leave-one-out | 9 / 12 | 0.131 |
 | v8 past-only (fitted only to earlier rounds) | 11 / 12 | 0.122 |
-| Crowd | 6 / 12 (8 / 14 incl. R16-D) | 0.283 |
+| Crowd | 6 / 12 | 0.283 |
 
 **How to read this:**
 - **Honest record:** the at-the-time column is the only one with no hindsight.
@@ -53,15 +64,16 @@ R16-D had no model call: the losing teams' unit cards were never captured.
 - **Coin flips:** v8's two R16-B misses are 52–54% coin flips; past-only's two "wins" there are 50–51%.
 
 **Could it be luck?** If both model and crowd were coin flips:
-- Over 12 matches, the model beats the crowd by 3 or more about **15%** of the time.
-- Over 14, a gap of 5 or more happens about **4%** of the time.
+- Over 14 matches, the model beats the crowd by 5 or more (the actual gap) about **4%** of the time.
+- The model alone gets 11 or more of 14 right about **3%** of the time.
 
-So the evidence leans toward a real edge but doesn't prove it.
+So the evidence points to a real edge, but 14 matches is a small sample.
 
-**When the model and crowd disagreed,** the model was right **4 of 5** times (R16-C M2, QF-A M1, QF-A M2, SF M2; the crowd won R16-B M1).
+**When the model and crowd disagreed,** the model was right **6 of 7** times (R16-C M2, QF-A M1, QF-A M2, SF M2 and both Final matches; the crowd won R16-B M1).
 
 ## What worked
 
+- **The Final:** the crowd backed Ninken (86%) and Grenadier (75%). The model gave Fruity 91% and Saurians 87%, and stress tests never took either below 62%. Both won at ×200 and ×105, worth +40,000 (Dino) and +27,365 (Shadow) in one round.
 - **Payout asymmetry:** the biggest wins came from strong sides the crowd under-rated. Two examples: Saurians in R16-A (Dino; ×200 at the last snapshot), and both QF-A underdogs (Saurians ×70, Fruity ×105).
 - **Reading mechanics off the replays instead of guessing:**
   - hit size (DEF × RES);
@@ -88,14 +100,19 @@ So the evidence leans toward a real edge but doesn't prove it.
   - unit positions and targeting are not tracked frame by frame;
   - R16-D couldn't be used.
 
-## Points (approximate; verified totals where noted)
+## Points by round
 
-| | Shadow (A) | Dino (B) |
-|---|---|---|
-| Verified before QF-B | 12,685 | 31,500 |
-| QF-B (both bets on underdogs that lost) | +1,000 | +1,000 |
-| SF (Shadow 115 Fruity ✗ + 85 Grenadier ✓; Dino 200 Grenadier ✓) | +5,400 | +10,000 |
-| **Before the Final** | **~19,085** | **~42,500** |
+Every per-match score is in `data/matches.csv`. The running totals match the verified pre-QF-B totals and the final leaderboard exactly.
+
+| Round | Shadow (A) | Dino (B) | Shadow total | Dino total |
+|---|---|---|---|---|
+| R16-A | +2,020 | +20,000 (Saurians ×200) | 2,020 | 20,000 |
+| R16-B | +2,440 | +1,000 | 4,460 | 21,000 |
+| R16-C, R16-D | no bets | no bets | 4,460 | 21,000 |
+| QF-A | +8,225 | +10,500 | 12,685 | 31,500 |
+| QF-B (both bets on underdogs that lost) | +1,000 | +1,000 | 13,685 | 32,500 |
+| SF | +5,400 | +10,000 | 19,085 | 42,500 |
+| **Final** | **+27,365** | **+40,000** | **46,450** | **82,500** |
 
 ## Final friends leaderboard
 
@@ -109,9 +126,9 @@ Final prediction scores on the in-game Friend Records board (full table in [../R
 | 4 | Friend 2 | 16,490 |
 | 5 | Friend 3 | 16,000 |
 
-Both accounts finished 1st and 2nd. The Final results themselves are still to be logged in `data/matches.csv`.
+Charts of the points trajectory and the model-vs-crowd record are in the [README](../README.md).
 
-## Final (locked Oct 19, 20:06 ET; result pending)
+## Final (locked Oct 19, 20:06 ET): both underdogs won
 
 | Match | Model (v8) | Crowd | Pooled (w = 0.65) | Multiplier | Break-even |
 |---|---|---|---|---|---|
@@ -123,3 +140,5 @@ Worst stress tests: Fruity 0.62, Saurians 0.66.
 **Bets:**
 - Shadow: 67 Fruity + 133 Saurians (EV ~18,400).
 - Dino: 200 Fruity (EV ~26,400).
+
+**Result:** Mirror Fruity beat Ninken and Saurians beat Grenadier, both confirmed in the replay and on the results screen. Shadow scored 67 × 200 + 133 × 105 = 27,365 against an EV of ~18,400. Dino scored 200 × 200 = 40,000 against an EV of ~26,400.

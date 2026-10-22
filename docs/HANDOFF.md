@@ -1,12 +1,20 @@
-# Handoff: start here (state as of 2026-10-19 20:30, Final locked)
+# Handoff (event complete, 2026-10-21)
 
-New session: read this file first, then docs/SUMMARY.md (results so far), docs/DECISIONS.md (reasoning), docs/MECHANICS.md (measured rules), docs/VERSION_HISTORY.md, and the last sections of docs/PROCESS_LOG.md (dated log). README.md has the repo layout.
+**The event is over.** Final standings on the friends board: Dino 82,500 (1st), Shado 46,450 (2nd), best other friend 16,600. In the Final, Fruity and Saurians both won, so every bet paid. The model was right on 11 of 14 calls made at the time, against 6 of 14 for the crowd. The results are logged in `data/matches.csv` and written up in the README and `docs/SUMMARY.md`.
+
+**Still open, if the project is picked back up:**
+- **Final replay:** process the Final replay (`Finals_and_3rd_place.mp4`): extract, write outcomes, refit to 14 replays.
+- **Account names:** Shadow/Dino are in the pushed history. Keep them, rename them going forward, or scrub the history.
+
+The rest of this file is the per-round operating procedure, kept for reference.
+
+New session: read the README first, then docs/SUMMARY.md (results so far), docs/DECISIONS.md (reasoning), docs/MECHANICS.md (measured rules), docs/VERSION_HISTORY.md, and the last sections of docs/PROCESS_LOG.md (dated log). README.md has the repo layout.
 
 ## Who / what
 - Owner: Jaden. Two game accounts:
   - **Shado** (also spelled Shadow): Strategy A, max CE = EV − (λ/2)·Var, **λ = 2.1e-4 (fixed)**. Goal is "maximize score, minimize risk". It is NOT aiming for the 16k tier, so do not use 16k-threshold arguments to set λ.
   - **Dino:** Strategy B, max EV.
-- Points after QF-B (both bets lost, 100 × 10 each): Shado ~13,685, Dino ~32,500.
+- Final points: Shado 46,450, Dino 82,500.
 
 ## Game rules (confirmed by Jaden; earlier docs may say otherwise)
 - Up to **300 emblems per match** (slider max). 100 emblems granted per day, held cap 300.
@@ -64,8 +72,8 @@ New session: read this file first, then docs/SUMMARY.md (results so far), docs/D
   - Championship: Saurians (L, 25%, ×105) vs Grenadier (R, 75%, ×30). v8 model 0.867.
   - Trust w = 0.65 → pooled 0.64 / 0.65. Worst stress tests: 0.62 / 0.66.
   - **Bets:** Shado 67 Fruity + 133 Saurians; Dino 200 Fruity.
-- **After the Final:** log the results, process the replay, and write the summary (README results + what worked / didn't).
-- **Open:** account names (Shadow/Dino) are in the pushed repo, which conflicts with the earlier "no real account names" rule. Jaden hasn't decided between keeping them, renaming them going forward, or scrubbing the history.
+- **Final result:** Fruity and Saurians both won. Shado +27,365, Dino +40,000. Logged, and the README and SUMMARY are updated.
+- **Open (also listed at the top):** account names (Shadow/Dino) are in the pushed repo, which conflicts with the earlier "no real account names" rule. Jaden hasn't decided between keeping them, renaming them going forward, or scrubbing the history.
 
 ## Working rules
 - Commit locally after each step. Push only when Jaden says to.

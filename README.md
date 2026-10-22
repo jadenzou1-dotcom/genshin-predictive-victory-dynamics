@@ -1,70 +1,121 @@
-# Genshin Impact — Predictive Victory Dynamics Model
+# Predictive Victory Dynamics: beating the crowd with a battle simulator
 
-> New session? Start with [HANDOFF.md](HANDOFF.md) for the current state and the per-round workflow.
+A quantitative betting model for Genshin Impact's *Predictive Victory Dynamics* event (Oct 12–19, 2026). Players stake Victory Emblems on one of two auto-battling armies, and the less popular side pays a higher multiplier. This project built a Monte Carlo battle simulator from each unit's stat card, fitted it to frame-by-frame readings of every replay, and used it to find the sides the crowd under-rated.
 
-A small quantitative model for betting on Genshin Impact's *Predictive Victory Dynamics* event (October 2026). In the event, players place Victory Emblems on one of two simulated armies, and a crowd-driven multiplier pays more for backing the less popular side.
+## Result
 
-The goal is to beat the crowd's support rate by combining (1) a Monte Carlo battle simulation built from each unit's listed stats and skills with (2) the event's payout math.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="charts/points_by_round_dark.png">
+  <img alt="Cumulative prediction score by round: Dino 82,500 and Shado 46,450, against a best friend's score of 16,600" src="charts/points_by_round_light.png">
+</picture>
 
-## The event in one paragraph
+- **1st and 2nd on the friends leaderboard.** The two accounts finished on 82,500 (Dino, max expected value) and 46,450 (Shado, risk-adjusted). The best of the other friends finished on 16,600.
+- **The Final made the event.** The crowd gave Mirror Fruity Order 14% and Saurians 25%. The model gave them 91% and 87%. Both won, paying ×200 and ×105: +40,000 for Dino and +27,365 for Shado in one round.
 
-There are 16 simulated battles across 8 rounds (Round of 16 → Final). Each round, you commit Victory Emblems to one side of each match (up to 300 per match; 100 new emblems per day, cap 300). The **support rate** (the share of all players' emblems on each side) sets a **score multiplier**: the less popular the side, the higher the multiplier. Support rates lock 4 hours before the round ends. A correct pick scores `emblems × multiplier`. A wrong pick still scores `emblems × 10`. Reward tiers run up to a 16,000 prediction score.
+| Rank | Player | Final score |
+|---|---|---|
+| 1 | **Dino** (Strategy B) | 82,500 |
+| 2 | **Shado** (Strategy A) | 46,450 |
+| 3 | Friend 1 | 16,600 |
+| 4 | Friend 2 | 16,490 |
+| 5 | Friend 3 | 16,000 |
+
+## Model vs crowd
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="charts/model_vs_crowd_dark.png">
+  <img alt="Probability the model and the crowd gave the eventual winner in each of 14 matches; the model is above 50% in 11, the crowd in 6" src="charts/model_vs_crowd_light.png">
+</picture>
+
+Each dot is the probability a predictor gave the side that actually won. The model column uses the call made before each match, with no hindsight. The crowd column is the support rate read as a probability.
+
+| 14 modelled matches | Correct | Mean Brier (lower is better) |
+|---|---|---|
+| Model (call made at the time, v1–v8) | **11 / 14** | **0.234** |
+| Crowd | 6 / 14 | 0.336 |
+
+- **Disagreements:** when the model and the crowd picked different sides, the model was right 6 times out of 7.
+- **Could it be luck?** If both were coin flips, a gap of 5 or more over 14 matches happens about 4% of the time. The edge looks real, but 14 matches is a small sample.
+- **Coverage:** two R16-D matches had no model call because the losing teams' unit cards were never captured. Counting them, the crowd went 8 / 16.
+
+Full match-by-match detail is in **[RESULTS.md](RESULTS.md)**.
+
+## How it works
+
+```mermaid
+flowchart LR
+    A[Unit stat cards<br>+ board positions] --> B[sim.py<br>Monte Carlo battle sim]
+    R[Replay videos] --> X[replay/<br>HP bars, clock, damage OCR]
+    X --> C[calibrate_traj.py<br>kernel ABC fit]
+    C --> B
+    B --> D[blend.py<br>model + crowd pool]
+    S[Crowd support<br>+ multipliers] --> D
+    D --> E[strategies.py<br>emblem allocation]
+    E --> F[Shado: max certainty equivalent<br>Dino: max expected value]
+```
+
+1. **Simulate.** `sim.py` plays each battle thousands of times on a grid, with each unit's stats, targeting, AoE, crowd control, elemental reactions and overtime. Parameters it can't read off a card are drawn from a posterior.
+2. **Calibrate.** The `replay/` tools read team HP bars, the clock, commentary and damage numbers from each replay. `calibrate_traj.py` keeps the parameter draws whose simulated HP curves match the real ones. Twelve replays were fitted by the end.
+3. **Blend.** The model is pooled with the crowd's implied probability. The trust weight depends on how many of the units have been seen in replays: about 0.6 when all of them have, about 0.35 when key units haven't.
+4. **Allocate.** A correct pick pays `emblems × multiplier` and a wrong pick pays `emblems × 10`. `strategies.py` searches every split of the round's emblems. Each account ran one objective, as a controlled comparison:
+   - **Shado (A):** maximise `EV − (λ/2)·Var`, with λ = 2.1e-4.
+   - **Dino (B):** maximise EV.
+
+Payout asymmetry drove the results, more than disagreeing with the crowd's favourite. The biggest wins were strong teams priced as long shots.
 
 ## Documentation
 
 | Doc | What it covers |
 |---|---|
-| [docs/SUMMARY.md](docs/SUMMARY.md) | **Start here.** Overall results, the 14-match track record (model vs crowd), what worked and what didn't, points |
-| [docs/VERSION_HISTORY.md](docs/VERSION_HISTORY.md) | Model v1 → v8: what each version changed, why, and how well it fit |
-| [docs/MECHANICS.md](docs/MECHANICS.md) | Game rules and battle mechanics measured from replays and screens, plus the payout table |
-| [docs/DECISIONS.md](docs/DECISIONS.md) | Every major decision and its reasoning: objective (Sharpe → CE), λ, trust weights, panel, pacing, betting against the crowd |
+| [docs/SUMMARY.md](docs/SUMMARY.md) | Full write-up: track record with hindsight-free and backtest columns, what worked, what went wrong, points by round |
+| [RESULTS.md](RESULTS.md) | Every match: crowd support, multipliers, model call, winner, picks, score (generated) |
+| [docs/VERSION_HISTORY.md](docs/VERSION_HISTORY.md) | Model v1 → v8: what each version changed and how well it fit |
+| [docs/MECHANICS.md](docs/MECHANICS.md) | Game rules and battle mechanics measured from replays, plus the payout table |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | Major decisions and their reasoning: Sharpe → CE, λ, trust weights, pacing |
 | [docs/PROCESS_LOG.md](docs/PROCESS_LOG.md) | Full dated log of everything done, in order |
-| [docs/rounds/](docs/rounds/) | Early per-round analysis notes (R16-A to R16-C) |
-| [docs/SKILLS.md](docs/SKILLS.md) | Skills used and developed |
-| [RESULTS.md](RESULTS.md) | Generated match-by-match results page (`python make_results.py`) |
-| [HANDOFF.md](HANDOFF.md) | Current state and next steps, for picking up in a new session |
+| [docs/SKILLS.md](docs/SKILLS.md) | Techniques used, by area |
+| [docs/HANDOFF.md](docs/HANDOFF.md) | Per-round operating procedure and final state, for picking the project back up |
+| [docs/rounds/](docs/rounds/) | Early per-round notes (R16-A to R16-C) |
 
-## Workflow (each round)
+## Reproduce
 
-1. **Capture.** Screenshot each unit's detail card (stats, tags, skill text) and the board layout.
-2. **Record.** Add new unit types to `data/units.csv` and each unit's grid position to `data/placements.csv`. Log support rates and multipliers to `data/matches.csv`.
-3. **Simulate.** Run `python sim.py <round>`, e.g. `python sim.py R16-A`. This prints P(left wins), how sensitive that is to the biggest unknowns, and the expected value per emblem for each side.
-4. **Decide.** Run `python strategies.py <round> --pool <emblems> --lambda 2.1e-4 --linw <w1>,<w2>`. Two strategies run in parallel, one per account: **A (risk-adjusted, main account)** and **B (max-EV, second account)**. A was max-Sharpe for R16-A and R16-B and switches to max certainty equivalent (CE) from here on; see [docs/DECISIONS.md](docs/DECISIONS.md). It also scores two paper benchmarks (naive-underdog, crowd-favourite). Commit shortly before the support-rate lock so the multiplier you see is close to final.
-   - **Log the crowd.** Before the round closes, add a row per match to `data/crowd_log.csv` with the support rates and multipliers on screen. The game stops showing them once the round ends.
-5. **Calibrate.** After the battle, run `python -m replay.extract <video> <round> data/replays/extracted` (team + unit HP bars, clock, commentary), `python -m replay.observe <round>` (battle-time curves) and `python -m replay.dmg <video> <round>` (damage numbers; `python -m replay.attribute <round>` maps them to attackers). Log winner / remaining HP / wipe time to `data/replays/<round>_outcomes.csv`, note unit behaviour in `data/units.csv` and `docs/rounds/`, then run `python calibrate_traj.py 3000 2` to refit the model to every replay so far, and `python make_results.py` to refresh [RESULTS.md](RESULTS.md). Every change is logged in [`docs/PROCESS_LOG.md`](docs/PROCESS_LOG.md).
+The model, calibration and backtests use only the Python standard library. The replay readers need `opencv-python`, `numpy` and `rapidocr_onnxruntime`, and the charts need `matplotlib`.
+
+```bash
+python sim.py SF                       # P(left wins), sensitivity and EV per emblem for a round
+python strategies.py SF --pool 200 --lambda 2.1e-4 --linw 0.6,0.6
+python loo.py                          # leave-one-out and past-only backtests
+python calibrate_traj.py 3000 2        # refit to every replay outcome in data/replays/
+python make_results.py                 # rebuild RESULTS.md from the CSVs
+python make_charts.py                  # rebuild the charts above
+```
+
+The CSVs in `data/` are the source of truth. `RESULTS.md` and `charts/` are generated from them.
 
 ## Repo layout
 
 ```
-├── README.md, RESULTS.md, HANDOFF.md
-├── docs/                      write-ups (see Documentation above)
-├── sim.py                     Monte Carlo battle simulator (core model)
-├── calibrate_traj.py          fits the sim to replay trajectories (kernel ABC) -> data/calibration_samples.csv
-├── loo.py                     honest backtests: leave-one-out and past-only
-├── strategies.py              emblem allocation: Strategy A (CE) and B (EV), benchmarks, break-evens
-├── blend.py                   model/crowd blending (log-odds; trust-weight checks)
-├── margin_check.py            where an actual result falls in the model's own outcome distribution
-├── make_results.py            builds RESULTS.md from the CSVs
-├── replay/                    replay video readers
-│   ├── extract.py             team/unit HP bars, clock and commentary (OCR) per frame
-│   ├── observe.py             per-second battle curves from the extracted frames
-│   ├── bars.py                overhead HP-bar detector
-│   ├── dmg.py                 damage-number reader (OCR)
-│   └── attribute.py           maps damage values to attacking unit types
-├── calibrate.py, replay_hp_tracker.py, allocation_curve.py    early tools, superseded (kept for history)
-├── charts/                    early allocation charts
-└── data/
-    ├── units.csv              every unit type: stats, tags, element, special mechanics flags, replay notes
-    ├── placements.csv         every unit's grid position per match
-    ├── matches.csv            every match: crowd, multipliers, model P, picks, winner, points, Brier (the track record)
-    ├── crowd_log.csv          timestamped support-rate / multiplier snapshots
-    ├── leaderboard.csv        final friends prediction-score leaderboard (others anonymized)
-    ├── unit_hits_measured.csv per-hit damage read from replays
-    ├── calibration_samples.csv current posterior draws used by sim.py
-    ├── backtest.csv, backtest_v8_loo.txt   backtest outputs (v5, v8)
-    └── replays/               <round>_outcomes.csv (winner, HP left, wipe time) and extracted/ per-frame data
+├── README.md, RESULTS.md
+├── sim.py                 Monte Carlo battle simulator (core model)
+├── calibrate_traj.py      fits the sim to replay trajectories (kernel ABC) -> data/calibration_samples.csv
+├── blend.py               model/crowd pooling and trust-weight checks
+├── strategies.py          emblem allocation: Strategy A (CE), B (EV), benchmarks, break-evens
+├── loo.py                 leave-one-out and past-only backtests
+├── margin_check.py        where a real result falls in the model's own outcome distribution
+├── make_results.py        builds RESULTS.md
+├── make_charts.py         builds charts/
+├── replay/                replay video readers: extract, observe, bars, dmg (OCR), attribute
+├── charts/                README charts (light and dark)
+├── data/
+│   ├── matches.csv        every match: crowd, multipliers, model P, picks, winner, score, Brier
+│   ├── leaderboard.csv    final friends leaderboard (other players anonymized)
+│   ├── units.csv          every unit type: stats, tags, element, mechanics flags
+│   ├── placements.csv     every unit's grid position per match
+│   ├── crowd_log.csv      timestamped support-rate and multiplier snapshots
+│   ├── unit_hits_measured.csv, calibration_samples*.csv, backtest*
+│   └── replays/           per-round outcomes and extracted per-frame data
+├── docs/                  write-ups (see Documentation)
+└── legacy/                superseded early tools and charts, kept for history
 ```
 
-## Results so far
-
-See **[RESULTS.md](RESULTS.md)**: the final friends leaderboard (Dino 82,500, Shadow 46,450, then three friends at ~16k), then every match with crowd support, multipliers, the model's call, the winner and Brier scores, plus the crowd snapshots for each round. It's generated from the CSVs by `python make_results.py`.
+*Account names:* Shado appears as "Shadow" in the older notes and the CSVs.

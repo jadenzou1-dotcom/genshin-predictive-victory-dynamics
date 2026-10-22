@@ -1,4 +1,7 @@
-"""Calibrate sim parameters to observed replays (nested ABC rejection sampling).
+"""SUPERSEDED by calibrate_traj.py (kept for history). Run from the repo root:
+    python legacy/calibrate.py [draws]
+
+Calibrate sim parameters to observed replays (nested ABC rejection sampling).
 
 A parameter draw "reproduces" a replay if the simulated battle has the right
 winner, the winner's remaining HP within ±TOL_HP, and the loser wiped within
@@ -12,10 +15,11 @@ Usage: python calibrate.py [draws]
 """
 import csv, glob, random, statistics, sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import sim
 
 TOL_HP, TOL_T = 0.15, 8.0
-ROOT = Path(__file__).parent
+ROOT = Path(__file__).resolve().parent.parent
 
 obs = []
 for f in sorted(glob.glob(str(ROOT / "data" / "replays" / "*_outcomes.csv"))):

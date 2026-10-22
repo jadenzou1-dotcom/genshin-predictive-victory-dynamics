@@ -922,3 +922,16 @@ New docs:
 - `docs/DECISIONS.md` (README's strategy decisions moved here and extended).
 
 README is now an index plus the repo layout.
+
+## 2026-10-21: Final result and repo presentation pass
+
+**Final result:** Mirror Fruity beat Ninken (3rd place) and Saurians beat Grenadier (Championship), confirmed in the replay and on the results screen. Shadow +27,365 (67 × 200 + 133 × 105), Dino +40,000 (200 × 200).
+- **Friends leaderboard:** Dino 82,500, Shadow 46,450, best other friend 16,600. Stored in `data/leaderboard.csv`, with the other players anonymized.
+- **Final track record:** model at the time 11 / 14 (Brier 0.234); crowd 6 / 14 (0.336), or 8 / 16 including R16-D. In disagreements the model went 6 / 7.
+- **Early scores back-filled:** R16-A and R16-B scores were added to `matches.csv` from the picks and multipliers. Running totals match the verified pre-QF-B totals and the final leaderboard exactly.
+
+**Repo reorganized for presentation:**
+- **README:** rewritten as the landing page, with results, two charts (`make_charts.py`, light and dark), the model-vs-crowd record, a pipeline diagram and reproduce commands.
+- **Moves:** `HANDOFF.md` → `docs/HANDOFF.md`. The superseded tools (`calibrate.py`, `allocation_curve.py`, `replay_hp_tracker.py`) and the early allocation charts → `legacy/`, with paths patched so they still run.
+- **RESULTS.md:** now shows the friends leaderboard and the crowd's all-decided record.
+- **Not done yet:** processing the Final replay and refitting to 14 replays.

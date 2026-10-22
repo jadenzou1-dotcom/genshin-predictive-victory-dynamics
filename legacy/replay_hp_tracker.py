@@ -1,4 +1,5 @@
-"""Track team HP bars in a replay: fraction of 'filled' pixels along the bar row."""
+"""SUPERSEDED by replay/extract.py (kept for history).
+Track team HP bars in a replay: fraction of 'filled' pixels along the bar row."""
 import cv2, numpy as np, sys, csv
 cap=cv2.VideoCapture(sys.argv[1]); fps=cap.get(cv2.CAP_PROP_FPS)
 Y=175; L=(666,934); R=(988,1254)

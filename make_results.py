@@ -72,6 +72,9 @@ lines = [
 ]
 if bm and bc:
     lines.append(f"| Mean Brier score (lower is better) | {sum(bm) / len(bm):.3f} | {sum(bc) / len(bc):.3f} |")
+crowd_all = sum((num(m["left_support_pct"]) > 50) == (m["winner"] == "L")
+                for m in decided if num(m["left_support_pct"]) is not None)
+lines.append(f"| Crowd, all {len(decided)} decided matches (incl. unmodelled) | — | {crowd_all} / {len(decided)} |")
 lines += [
     "",
     "The model never sees support rates; \"Crowd\" is the support rate read as a win probability. "
@@ -85,7 +88,7 @@ if board:
     lines += [
         "## Final leaderboard (friends, prediction score)",
         "",
-        "End-of-event Friend Records board from the game. Source: "
+        "End-of-event Friend Records board from the game. Charts: [README](README.md). Source: "
         "[`data/leaderboard.csv`](data/leaderboard.csv). Other players are anonymized.",
         "",
         "| Rank | Player | Score | vs. 1st |",

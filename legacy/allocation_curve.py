@@ -1,4 +1,6 @@
-"""Sweep Strategy A's split between the two per-match favourites and plot
+"""SUPERSEDED by strategies.py (kept for history). Writes legacy/charts/<round>_allocation.png.
+
+Sweep Strategy A's split between the two per-match favourites and plot
 Sharpe, EV and SD against the allocation. Saves charts/<round>_allocation.png.
 
 x = emblems on the Match-1 leg, the rest on the Match-2 leg.
@@ -11,7 +13,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 FLOOR = 10
-ROOT = Path(__file__).parent
+ROOT = Path(__file__).resolve().parent.parent
 rnd = sys.argv[1]
 POOL = int(sys.argv[2]) if len(sys.argv) > 2 else 100
 
@@ -62,7 +64,7 @@ axs[0].annotate(f"all on {a['team'].split()[-2]} {a['team'].split()[-1]}: {sh[-1
 axs[2].set_xlabel(f"Emblems on {a['team']} (M{a['match']})  ·  rest on {b['team']} (M{b['match']})")
 fig.suptitle(f"Strategy A allocation sweep — {rnd}", x=0.06, ha="left", color=INK, fontsize=13)
 fig.tight_layout()
-out = ROOT / "charts" / f"{rnd}_allocation.png"
+out = ROOT / "legacy" / "charts" / f"{rnd}_allocation.png"
 out.parent.mkdir(exist_ok=True)
 fig.savefig(out, dpi=150, facecolor=SURF)
 print(f"\nsaved {out.relative_to(ROOT)}")
