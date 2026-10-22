@@ -1,0 +1,6 @@
+rank,player,score,is_ours,notes
+1,Dino,82500,yes,Strategy B (max EV)
+2,Shado,46450,yes,Strategy A (max CE)
+3,Friend 1,16600,no,
+4,Friend 2,16490,no,
+5,Friend 3,16000,no,

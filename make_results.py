@@ -8,6 +8,7 @@ from collections import OrderedDict
 
 MATCHES = "data/matches.csv"
 CROWD = "data/crowd_log.csv"
+BOARD = "data/leaderboard.csv"
 OUT = "RESULTS.md"
 
 
@@ -33,6 +34,10 @@ def load(path):
 
 matches = load(MATCHES)
 crowd = load(CROWD)
+try:
+    board = load(BOARD)
+except FileNotFoundError:
+    board = []
 
 # ---- headline numbers -------------------------------------------------------
 decided = [m for m in matches if m["winner"] in ("L", "R")]
@@ -73,6 +78,24 @@ lines += [
     f"Scored on the {len(scored)} matches the model predicted ({len(decided) - len(scored)} decided matches had no model prediction).",
     "",
 ]
+
+# ---- final friends leaderboard ---------------------------------------------
+if board:
+    top = max(int(r["score"]) for r in board)
+    lines += [
+        "## Final leaderboard (friends, prediction score)",
+        "",
+        "End-of-event Friend Records board from the game. Source: "
+        "[`data/leaderboard.csv`](data/leaderboard.csv). Other players are anonymized.",
+        "",
+        "| Rank | Player | Score | vs. 1st |",
+        "|---|---|---|---|",
+    ]
+    for r in board:
+        name = f"**{r['player']}**" if r["is_ours"] == "yes" else r["player"]
+        gap = "—" if int(r["score"]) == top else f"−{top - int(r['score']):,}"
+        lines.append(f"| {r['rank']} | {name} | {int(r['score']):,} | {gap} |")
+    lines.append("")
 
 # ---- per round --------------------------------------------------------------
 rounds = OrderedDict()

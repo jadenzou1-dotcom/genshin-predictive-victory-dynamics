@@ -58,6 +58,7 @@ There are 16 simulated battles across 8 rounds (Round of 16 → Final). Each rou
     ├── placements.csv         every unit's grid position per match
     ├── matches.csv            every match: crowd, multipliers, model P, picks, winner, points, Brier (the track record)
     ├── crowd_log.csv          timestamped support-rate / multiplier snapshots
+    ├── leaderboard.csv        final friends prediction-score leaderboard (others anonymized)
     ├── unit_hits_measured.csv per-hit damage read from replays
     ├── calibration_samples.csv current posterior draws used by sim.py
     ├── backtest.csv, backtest_v8_loo.txt   backtest outputs (v5, v8)
@@ -66,4 +67,4 @@ There are 16 simulated battles across 8 rounds (Round of 16 → Final). Each rou
 
 ## Results so far
 
-See **[RESULTS.md](RESULTS.md)**: every match with crowd support, multipliers, the model's call, the winner and Brier scores, plus the crowd snapshots for each round. It's generated from the CSVs by `python make_results.py`.
+See **[RESULTS.md](RESULTS.md)**: the final friends leaderboard (Dino 82,500, Shadow 46,450, then three friends at ~16k), then every match with crowd support, multipliers, the model's call, the winner and Brier scores, plus the crowd snapshots for each round. It's generated from the CSVs by `python make_results.py`.

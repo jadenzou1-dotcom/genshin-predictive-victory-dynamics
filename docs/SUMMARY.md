@@ -97,6 +97,20 @@ So the evidence leans toward a real edge but doesn't prove it.
 | SF (Shadow 115 Fruity ✗ + 85 Grenadier ✓; Dino 200 Grenadier ✓) | +5,400 | +10,000 |
 | **Before the Final** | **~19,085** | **~42,500** |
 
+## Final friends leaderboard
+
+Final prediction scores on the in-game Friend Records board (full table in [../RESULTS.md](../RESULTS.md)):
+
+| Rank | Player | Score |
+|---|---|---|
+| 1 | Dino (B, max EV) | 82,500 |
+| 2 | Shadow (A, max CE) | 46,450 |
+| 3 | Friend 1 | 16,600 |
+| 4 | Friend 2 | 16,490 |
+| 5 | Friend 3 | 16,000 |
+
+Both accounts finished 1st and 2nd. The Final results themselves are still to be logged in `data/matches.csv`.
+
 ## Final (locked Oct 19, 20:06 ET; result pending)
 
 | Match | Model (v8) | Crowd | Pooled (w = 0.65) | Multiplier | Break-even |
