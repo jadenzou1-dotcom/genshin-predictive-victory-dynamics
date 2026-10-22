@@ -935,3 +935,12 @@ README is now an index plus the repo layout.
 - **Moves:** `HANDOFF.md` → `docs/HANDOFF.md`. The superseded tools (`calibrate.py`, `allocation_curve.py`, `replay_hp_tracker.py`) and the early allocation charts → `legacy/`, with paths patched so they still run.
 - **RESULTS.md:** now shows the friends leaderboard and the crowd's all-decided record.
 - **Not done yet:** processing the Final replay and refitting to 14 replays.
+
+**Track record shown as a table:** the dot chart is replaced by a generated table, written into README, SUMMARY and RESULTS by `make_results.py`.
+- **Columns:** each match gets live, walk-forward (past-only), leave-one-out, crowd and winner.
+- **Scoreboard labels:** each predictor is labelled by its look-ahead bias.
+  - live 11/14: none;
+  - walk-forward 13/14: structural only;
+  - LOO 11/14: parameter + structural;
+  - crowd 6/14.
+- **Source data:** per-match v8 backtests are now in `data/backtest_v8.csv`. The Final rows equal v8 fitted on the 12 earlier replays.
