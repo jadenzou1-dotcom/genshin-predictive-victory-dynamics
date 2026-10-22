@@ -8,7 +8,7 @@
 
 The rest of this file is the per-round operating procedure, kept for reference.
 
-New session: read the README first, then docs/SUMMARY.md (results so far), docs/DECISIONS.md (reasoning), docs/MECHANICS.md (measured rules), docs/VERSION_HISTORY.md, and the last sections of docs/PROCESS_LOG.md (dated log). README.md has the repo layout.
+New session: read the README first, then docs/SUMMARY.md (results so far), docs/DECISIONS.md (reasoning), docs/MECHANICS.md (measured rules), docs/VERSION_HISTORY.md, and the last sections of docs/FULL_PROJECT_JOURNEY_JOURNAL.md (dated log). README.md has the repo layout.
 
 ## Who / what
 - Owner: Jaden. Two game accounts:

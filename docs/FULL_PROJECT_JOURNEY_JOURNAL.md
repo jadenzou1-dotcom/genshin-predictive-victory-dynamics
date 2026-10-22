@@ -911,8 +911,8 @@ Not used:
 None of these could flip a Final pick: the stress tests already push those quantities.
 
 **Repo reorganized:** docs moved into `docs/`:
-- PROCESS.md → `docs/PROCESS_LOG.md`;
-- SKILLS.md → `docs/SKILLS.md`;
+- PROCESS.md → `docs/PROCESS_LOG.md` (renamed again on Oct 22, see below);
+- SKILLS.md → `docs/SKILLS.md` (renamed again on Oct 22, see below);
 - notes/ → `docs/rounds/`.
 
 New docs:
@@ -944,3 +944,13 @@ README is now an index plus the repo layout.
   - LOO 11/14: parameter + structural;
   - crowd 6/14.
 - **Source data:** per-match v8 backtests are now in `data/backtest_v8.csv`. The Final rows equal v8 fitted on the 12 earlier replays.
+
+---
+
+## 2026-10-22 — Doc renames (Jaden)
+
+Renamed so the names say what the files are:
+- `docs/PROCESS_LOG.md` → `docs/FULL_PROJECT_JOURNEY_JOURNAL.md`: the dated journal of the whole project's journey (rounds, bets, model changes, panels, corrections, reasoning). `VERSION_HISTORY.md` covers only the model.
+- `docs/SKILLS.md` → `docs/SKILLS_DEVELOPED_DURING_PROJECT.md`: the skills developed during the project.
+
+All links were updated.

@@ -14,7 +14,7 @@ Related docs:
 - [VERSION_HISTORY.md](VERSION_HISTORY.md): what changed in each model version.
 - [MECHANICS.md](MECHANICS.md): the game rules that were measured.
 - [DECISIONS.md](DECISIONS.md): why each choice was made.
-- [PROCESS_LOG.md](PROCESS_LOG.md): the full dated log.
+- [FULL_PROJECT_JOURNEY_JOURNAL.md](FULL_PROJECT_JOURNEY_JOURNAL.md): the full dated log.
 - [../RESULTS.md](../RESULTS.md): match-by-match detail.
 
 ## Track record (all 16 matches)

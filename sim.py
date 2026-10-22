@@ -1,7 +1,7 @@
 """Monte Carlo battle model for Genshin's "Predictive Victory Dynamics" event.
 
 v3 (after the R16-A replay):
-  * fixed 45 s battle clock; no HP drain was observed inside it (see docs/PROCESS_LOG.md)
+  * fixed 45 s battle clock; no HP drain was observed inside it (see docs/FULL_PROJECT_JOURNEY_JOURNAL.md)
   * elemental auras and reactions (freeze, vaporize/melt, electro-charged,
     superconduct, swirl); Freeze stuns the target
   * dual-element units (e.g. "Hydro|Cryo") alternate elements and so can

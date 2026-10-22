@@ -1,6 +1,6 @@
 # Decisions and reasoning
 
-Every non-obvious choice made during the event, why it was made, and what was learned. The dated detail is in [PROCESS_LOG.md](PROCESS_LOG.md).
+Every non-obvious choice made during the event, why it was made, and what was learned. The dated detail is in [FULL_PROJECT_JOURNEY_JOURNAL.md](FULL_PROJECT_JOURNEY_JOURNAL.md).
 
 **The two accounts:**
 - **Strategy A** (main account, called "Shadow" in the logs) is risk-adjusted.
@@ -23,7 +23,7 @@ To find out why, I reduced it to two coins:
 
 Making the bet strictly worse (same odds, smaller payout, half the EV) *raised* its Sharpe. With a fixed 10-point floor, Sharpe on a binary bet reduces to `sqrt(p/(1−p))`: the payout cancels out entirely, so Sharpe only rewards how *reliably* a bet wins, never how *much*.
 
-Sharpe isn't wrong in general. It's the right yardstick when you can lever a portfolio up or down to your risk target. Here stakes are capped at 100 emblems, there's no leverage, payoffs are lumpy and skewed, and the downside is bounded by the floor. Under those conditions max-Sharpe just picks the smallest swings and leaves EV on the table. Full write-up: [PROCESS_LOG.md, 2026-10-13 "where the Sharpe ratio falls short"](PROCESS_LOG.md).
+Sharpe isn't wrong in general. It's the right yardstick when you can lever a portfolio up or down to your risk target. Here stakes are capped at 100 emblems, there's no leverage, payoffs are lumpy and skewed, and the downside is bounded by the floor. Under those conditions max-Sharpe just picks the smallest swings and leaves EV on the table. Full write-up: [FULL_PROJECT_JOURNEY_JOURNAL.md, 2026-10-13 "where the Sharpe ratio falls short"](FULL_PROJECT_JOURNEY_JOURNAL.md).
 
 (Honest footnote: in R16-B the Sharpe split happened to score better, 2,440 vs 1,000 for all-in on Dye, because Dye lost. One outcome doesn't make it the right rule.)
 

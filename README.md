@@ -102,8 +102,8 @@ Payout asymmetry drove the results, more than disagreeing with the crowd's favou
 | [docs/VERSION_HISTORY.md](docs/VERSION_HISTORY.md) | Model v1 → v8: what each version changed and how well it fit |
 | [docs/MECHANICS.md](docs/MECHANICS.md) | Game rules and battle mechanics measured from replays, plus the payout table |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Major decisions and their reasoning: Sharpe → CE, λ, trust weights, pacing |
-| [docs/PROCESS_LOG.md](docs/PROCESS_LOG.md) | Full dated log of everything done, in order |
-| [docs/SKILLS.md](docs/SKILLS.md) | Techniques used, by area |
+| [docs/FULL_PROJECT_JOURNEY_JOURNAL.md](docs/FULL_PROJECT_JOURNEY_JOURNAL.md) | Full dated journal of the whole project journey: rounds, bets, model changes, panels, corrections and reasoning |
+| [docs/SKILLS_DEVELOPED_DURING_PROJECT.md](docs/SKILLS_DEVELOPED_DURING_PROJECT.md) | Skills developed during the project, by area |
 | [docs/HANDOFF.md](docs/HANDOFF.md) | Per-round operating procedure and final state, for picking the project back up |
 | [docs/rounds/](docs/rounds/) | Early per-round notes (R16-A to R16-C) |
 

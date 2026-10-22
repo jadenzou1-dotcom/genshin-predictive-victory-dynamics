@@ -1,6 +1,6 @@
 # Model version history
 
-What each version of the battle model changed, why, and what it predicted. Dated detail: [PROCESS_LOG.md](PROCESS_LOG.md). Measured game rules: [MECHANICS.md](MECHANICS.md).
+What each version of the battle model changed, why, and what it predicted. Dated detail: [FULL_PROJECT_JOURNEY_JOURNAL.md](FULL_PROJECT_JOURNEY_JOURNAL.md). Measured game rules: [MECHANICS.md](MECHANICS.md).
 
 **How fit quality is measured:** calibration is kernel ABC on per-second replay trajectories (`calibrate_traj.py`). A smaller tolerance (EPS) at the same effective sample size (ESS) means the model reproduces the replays more closely. Fit numbers are only comparable at the same replay count.
 
