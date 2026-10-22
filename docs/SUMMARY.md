@@ -60,8 +60,9 @@ Each model or crowd cell shows the side it favoured (L/R) and how confident it w
 | QF-B&nbsp;M2 | **Ninken** vs Round-and-Frost | L&nbsp;56%&nbsp;✅ | L&nbsp;68%&nbsp;✅ | L&nbsp;68%&nbsp;✅ | L&nbsp;77%&nbsp;✅ | L |
 | SF&nbsp;M1 | Mirror Fruity vs **Saurians** | L&nbsp;91%&nbsp;❌ | L&nbsp;59%&nbsp;❌ | L&nbsp;61%&nbsp;❌ | L&nbsp;58%&nbsp;❌ | R |
 | SF&nbsp;M2 | **Grenadier** vs Ninken | L&nbsp;80%&nbsp;✅ | L&nbsp;80%&nbsp;✅ | L&nbsp;79%&nbsp;✅ | R&nbsp;53.0%&nbsp;❌ | L |
-| Final&nbsp;M1 | **Mirror Fruity** vs Ninken | L&nbsp;91%&nbsp;✅ | L&nbsp;92%&nbsp;✅ | L&nbsp;92%&nbsp;✅ | R&nbsp;86%&nbsp;❌ | L |
-| Final&nbsp;M2 | **Saurians** vs Grenadier | L&nbsp;87%&nbsp;✅ | L&nbsp;88%&nbsp;✅ | L&nbsp;88%&nbsp;✅ | R&nbsp;75%&nbsp;❌ | L |
+| 3rd&nbsp;place | **Mirror Fruity** vs Ninken | L&nbsp;91%&nbsp;✅ | L&nbsp;92%&nbsp;✅ | L&nbsp;92%&nbsp;✅ | R&nbsp;86%&nbsp;❌ | L |
+| Final | **Saurians** vs Grenadier | L&nbsp;87%&nbsp;✅ | L&nbsp;88%&nbsp;✅ | L&nbsp;88%&nbsp;✅ | R&nbsp;75%&nbsp;❌ | L |
+| **Correct** | *out of the 14 matches with a model call* | **11&nbsp;/&nbsp;14** | **13&nbsp;/&nbsp;14** | **11&nbsp;/&nbsp;14** | **6&nbsp;/&nbsp;14** | 14&nbsp;/&nbsp;14 |
 
 <!-- track-record:end -->
 

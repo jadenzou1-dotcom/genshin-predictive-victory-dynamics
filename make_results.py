@@ -55,6 +55,7 @@ SHORT = {
 }
 short = lambda t: SHORT.get(t, t)
 backtest = {(b["round"], b["match"]): b for b in load(BACKTEST)}
+ROUND_LABEL = {("Final", "1"): "3rd&nbsp;place", ("Final", "2"): "Final"}
 
 decided = [m for m in matches if m["winner"] in ("L", "R")]
 scored = [m for m in decided if num(m["model_p_left"]) is not None]  # the matches with a live call
@@ -131,9 +132,11 @@ for m in decided:
     w = m["winner"]
     L, R = short(m["left_team"]), short(m["right_team"])
     L, R = (f"**{L}**", R) if w == "L" else (L, f"**{R}**")
-    rnd = f"{m['round']}&nbsp;M{m['match']}"
+    rnd = ROUND_LABEL.get((m["round"], m["match"]), f"{m['round']}&nbsp;M{m['match']}")
     cells = [call(get(m), w) for _, _, get in PREDICTORS]
     track.append(f"| {rnd} | {L} vs {R} | " + " | ".join(cells) + f" | {w} |")
+totals = [f"**{S[k][0]}&nbsp;/&nbsp;{n}**" for k, _, _ in PREDICTORS]
+track.append(f"| **Correct** | *out of the {n} matches with a model call* | " + " | ".join(totals) + f" | {n}&nbsp;/&nbsp;{n} |")
 track.append("")
 
 START, END = "<!-- track-record:start -->", "<!-- track-record:end -->"
@@ -205,7 +208,7 @@ for rnd, ms in rounds.items():
         crowd_call = "—" if s is None else f"{L if crowd_side else R} ({max(s, 100 - s):.0f}%){tick(crowd_side)}"
 
         lines += [
-            f"### Match {m['match']}: {L} vs {R}",
+            f"### {ROUND_LABEL.get((m['round'], m['match']), 'Match ' + m['match']).replace('&nbsp;', ' ')}: {L} vs {R}",
             "",
             "| | Left | Right |",
             "|---|---|---|",

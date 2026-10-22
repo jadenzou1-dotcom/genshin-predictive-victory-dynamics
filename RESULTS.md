@@ -37,8 +37,9 @@ Each model or crowd cell shows the side it favoured (L/R) and how confident it w
 | QF-B&nbsp;M2 | **Ninken** vs Round-and-Frost | L&nbsp;56%&nbsp;✅ | L&nbsp;68%&nbsp;✅ | L&nbsp;68%&nbsp;✅ | L&nbsp;77%&nbsp;✅ | L |
 | SF&nbsp;M1 | Mirror Fruity vs **Saurians** | L&nbsp;91%&nbsp;❌ | L&nbsp;59%&nbsp;❌ | L&nbsp;61%&nbsp;❌ | L&nbsp;58%&nbsp;❌ | R |
 | SF&nbsp;M2 | **Grenadier** vs Ninken | L&nbsp;80%&nbsp;✅ | L&nbsp;80%&nbsp;✅ | L&nbsp;79%&nbsp;✅ | R&nbsp;53.0%&nbsp;❌ | L |
-| Final&nbsp;M1 | **Mirror Fruity** vs Ninken | L&nbsp;91%&nbsp;✅ | L&nbsp;92%&nbsp;✅ | L&nbsp;92%&nbsp;✅ | R&nbsp;86%&nbsp;❌ | L |
-| Final&nbsp;M2 | **Saurians** vs Grenadier | L&nbsp;87%&nbsp;✅ | L&nbsp;88%&nbsp;✅ | L&nbsp;88%&nbsp;✅ | R&nbsp;75%&nbsp;❌ | L |
+| 3rd&nbsp;place | **Mirror Fruity** vs Ninken | L&nbsp;91%&nbsp;✅ | L&nbsp;92%&nbsp;✅ | L&nbsp;92%&nbsp;✅ | R&nbsp;86%&nbsp;❌ | L |
+| Final | **Saurians** vs Grenadier | L&nbsp;87%&nbsp;✅ | L&nbsp;88%&nbsp;✅ | L&nbsp;88%&nbsp;✅ | R&nbsp;75%&nbsp;❌ | L |
+| **Correct** | *out of the 14 matches with a model call* | **11&nbsp;/&nbsp;14** | **13&nbsp;/&nbsp;14** | **11&nbsp;/&nbsp;14** | **6&nbsp;/&nbsp;14** | 14&nbsp;/&nbsp;14 |
 
 ## Final leaderboard (friends, prediction score)
 
@@ -371,7 +372,7 @@ End-of-event Friend Records board from the game. Charts: [README](README.md). So
 
 ## Final
 
-### Match 1: Mirror Fruity Order vs What Does the Ninken Say?
+### 3rd place: Mirror Fruity Order vs What Does the Ninken Say?
 
 | | Left | Right |
 |---|---|---|
@@ -388,7 +389,7 @@ End-of-event Friend Records board from the game. Charts: [README](README.md). So
 - **Brier:** model 0.008, crowd 0.740
 - **Notes:** 3rd-place playoff; FRUITY WON (confirmed in replay + results screen); 3rd-place playoff; PRE-LOCK support; multipliers locked (unchanged from 14:49); placements confirmed from board screenshots; v7 (12 replays) sensitivity 0.90-0.94, units-from-prior 0.91; panel w 0.50 -> 0.532; v8 (frost field, 12 replays, EPS 0.15 ESS 188): 0.919; trust w 0.65 from v8 backtest (leakage-discounted)
 
-### Match 2: Saurians Are the Cutest vs Reserve Grenadier Squad
+### Final: Saurians Are the Cutest vs Reserve Grenadier Squad
 
 | | Left | Right |
 |---|---|---|
